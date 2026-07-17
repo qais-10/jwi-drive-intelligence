@@ -32,23 +32,24 @@ async def get_google_access_token() -> str:
             detail="GOOGLE_REFRESH_TOKEN is not configured.",
         )
 
-    if response.status_code == 403:
-    raise HTTPException(
-        status_code=403,
-        detail={
-            "message": "Google Drive access was denied.",
-            "google_response": response.text,
-            "request_url": str(response.request.url),
-        },
-    )
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.post(
+            GOOGLE_TOKEN_URL,
+            data={
+                "client_id": settings.google_client_id,
+                "client_secret": settings.google_client_secret,
+                "refresh_token": settings.google_refresh_token,
+                "grant_type": "refresh_token",
+            },
+        )
 
     if response.is_error:
         raise HTTPException(
             status_code=502,
-            detail=(
-                f"Google token refresh failed: "
-                f"{response.status_code} {response.text}"
-            ),
+            detail={
+                "message": "Google token refresh failed.",
+                "google_response": response.text,
+            },
         )
 
     payload = response.json()
@@ -84,26 +85,32 @@ class GoogleDriveClient:
         if response.status_code == 401:
             raise HTTPException(
                 status_code=401,
-                detail="Google authentication failed or expired.",
+                detail={
+                    "message": "Google authentication failed or expired.",
+                    "google_response": response.text,
+                    "request_url": str(response.request.url),
+                },
             )
 
         if response.status_code == 403:
-    raise HTTPException(
-        status_code=403,
-        detail={
-            "message": "Google Drive access was denied.",
-            "google_response": response.text,
-            "request_url": str(response.request.url),
-        },
-    )
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "message": "Google Drive access was denied.",
+                    "google_response": response.text,
+                    "request_url": str(response.request.url),
+                },
+            )
 
         if response.is_error:
             raise HTTPException(
                 status_code=502,
-                detail=(
-                    f"Google Drive API error: "
-                    f"{response.status_code} {response.text}"
-                ),
+                detail={
+                    "message": "Google Drive API error.",
+                    "status_code": response.status_code,
+                    "google_response": response.text,
+                    "request_url": str(response.request.url),
+                },
             )
 
         return response.json()
@@ -140,8 +147,6 @@ class GoogleDriveClient:
             "q": " and ".join(clauses),
             "pageSize": min(page_size, 1000),
             "orderBy": "modifiedTime desc",
-            "corpora": "drive",
-            "driveId": settings.shared_drive_id,
             "fields": (
                 "nextPageToken,"
                 "files("
@@ -154,10 +159,14 @@ class GoogleDriveClient:
                 "driveId,"
                 "webViewLink"
                 ")"
-    ),
-    "includeItemsFromAllDrives": "true",
-    "supportsAllDrives": "true",
-}
+            ),
+            "includeItemsFromAllDrives": "true",
+            "supportsAllDrives": "true",
+        }
+
+        if settings.shared_drive_id:
+            params["corpora"] = "drive"
+            params["driveId"] = settings.shared_drive_id
 
         files: list[dict[str, Any]] = []
 
