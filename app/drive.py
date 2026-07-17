@@ -137,6 +137,8 @@ class GoogleDriveClient:
             "q": " and ".join(clauses),
             "pageSize": min(page_size, 1000),
             "orderBy": "modifiedTime desc",
+            "corpora": "drive",
+            "driveId": settings.shared_drive_id,
             "fields": (
                 "nextPageToken,"
                 "files("
@@ -149,10 +151,10 @@ class GoogleDriveClient:
                 "driveId,"
                 "webViewLink"
                 ")"
-            ),
-            "includeItemsFromAllDrives": "true",
-            "supportsAllDrives": "true",
-        }
+    ),
+    "includeItemsFromAllDrives": "true",
+    "supportsAllDrives": "true",
+}
 
         files: list[dict[str, Any]] = []
 
