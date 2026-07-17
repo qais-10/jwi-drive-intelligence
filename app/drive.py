@@ -89,10 +89,14 @@ class GoogleDriveClient:
             )
 
         if response.status_code == 403:
-            raise HTTPException(
-                status_code=403,
-                detail="Google Drive access was denied.",
-            )
+    raise HTTPException(
+        status_code=403,
+        detail={
+            "message": "Google Drive access was denied.",
+            "google_response": response.text,
+            "request_url": str(response.request.url),
+        },
+    )
 
         if response.is_error:
             raise HTTPException(
