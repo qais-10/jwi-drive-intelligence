@@ -6,6 +6,7 @@ class Settings(BaseSettings):
 
     clients_root_folder_id: str = "1-3FfMbvGrddiOHboFeNxUOAy6ds8uIFM"
     active_work_folder_name: str = "01. Working"
+    shared_drive_id: str = "0AM6Po6F6qN0UUk9PVA"
 
     google_client_id: str = ""
     google_client_secret: str = ""
