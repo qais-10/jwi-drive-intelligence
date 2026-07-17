@@ -32,16 +32,15 @@ async def get_google_access_token() -> str:
             detail="GOOGLE_REFRESH_TOKEN is not configured.",
         )
 
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        response = await client.post(
-            GOOGLE_TOKEN_URL,
-            data={
-                "client_id": settings.google_client_id,
-                "client_secret": settings.google_client_secret,
-                "refresh_token": settings.google_refresh_token,
-                "grant_type": "refresh_token",
-            },
-        )
+    if response.status_code == 403:
+    raise HTTPException(
+        status_code=403,
+        detail={
+            "message": "Google Drive access was denied.",
+            "google_response": response.text,
+            "request_url": str(response.request.url),
+        },
+    )
 
     if response.is_error:
         raise HTTPException(
