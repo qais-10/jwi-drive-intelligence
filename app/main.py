@@ -7,6 +7,7 @@ from .drive import (
 )
 from .models import RecentProjectsResponse
 from .projects import get_recent_projects
+from .vendors.router import router as vendors_router
 
 app = FastAPI(
     title=settings.app_name,
@@ -18,6 +19,8 @@ app = FastAPI(
         "with recent file activity."
     ),
 )
+
+app.include_router(vendors_router)
 
 
 @app.get(
