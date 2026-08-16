@@ -26,17 +26,20 @@ def _item_url(item_id: str) -> str:
 async def handle_new_submission(submission: VendorSubmission) -> VendorSubmissionResult:
     monday = MondayClient()
 
+    # The board's item name column is the contact person's name (it mirrors
+    # the JWI Contacts board); Company Name is a separate text column.
     item_id = await monday.create_item(
         settings.monday_board_id,
         settings.monday_group_new_submission,
-        submission.company_name,
+        submission.contact_name,
         {
-            settings.monday_col_contact_name: submission.contact_name,
-            settings.monday_col_contact_email: {
-                "email": submission.contact_email,
-                "text": submission.contact_email,
-            },
-            settings.monday_col_phone: submission.phone or "",
+            settings.monday_col_company_name: submission.company_name,
+            settings.monday_col_contact_email: submission.contact_email,
+            settings.monday_col_phone: (
+                {"phone": submission.phone, "countryShortName": "US"}
+                if submission.phone
+                else ""
+            ),
             settings.monday_col_company_address: submission.company_address or "",
             settings.monday_col_service_category: submission.service_category or "",
             settings.monday_col_tax_id: submission.tax_id or "",
@@ -58,6 +61,10 @@ async def handle_new_submission(submission: VendorSubmission) -> VendorSubmissio
                 settings.monday_col_ai_notes: decision.notes,
             },
         )
+        # Moving Approved/Rejected items out of Under Review is handled by
+        # native monday.com board automations, not here — but the initial
+        # New Submission -> Under Review move has no status-change trigger
+        # to hang off of, so it still happens explicitly.
         await monday.move_item_to_group(item_id, settings.monday_group_under_review)
         await _notify_slack_new_submission(submission, item_id)
         status = "under_review"
@@ -122,49 +129,6 @@ async def _email_missing_info(submission: VendorSubmission, missing_fields: list
         submission.contact_email,
         "Action needed: complete your vendor application",
         body,
-    )
-
-
-async def handle_monday_event(event: dict[str, Any]) -> None:
-    """Process a monday.com webhook event for the approval-status column.
-
-    Ops/management approve or reject a vendor by changing the "Approval
-    Status" column on the item while it sits in the Under Review group;
-    this moves the item into Approved Vendor or Archived accordingly.
-    """
-    if event.get("type") != "update_column_value":
-        return
-    if event.get("columnId") != settings.monday_col_approval_status:
-        return
-
-    item_id = event.get("pulseId")
-    if not item_id:
-        return
-
-    value = event.get("value") or {}
-    label = value.get("label") if isinstance(value, dict) else None
-    new_label = label.get("text") if isinstance(label, dict) else None
-
-    monday = MondayClient()
-
-    if new_label == constants.STATUS_APPROVED:
-        await monday.move_item_to_group(str(item_id), settings.monday_group_approved_vendor)
-        await _notify_slack_decision(str(item_id), event.get("pulseName", ""), approved=True)
-    elif new_label == constants.STATUS_REJECTED:
-        await monday.move_item_to_group(str(item_id), settings.monday_group_archived)
-        await _notify_slack_decision(str(item_id), event.get("pulseName", ""), approved=False)
-
-
-async def _notify_slack_decision(item_id: str, vendor_name: str, *, approved: bool) -> None:
-    if not settings.slack_bot_token or not settings.slack_channel_ops:
-        return
-
-    verb = "approved" if approved else "archived"
-    icon = ":white_check_mark:" if approved else ":file_folder:"
-    slack = SlackClient()
-    await slack.post_message(
-        settings.slack_channel_ops,
-        f"{icon} Vendor *{vendor_name}* was {verb}. <{_item_url(item_id)}|View in monday.com>",
     )
 
 

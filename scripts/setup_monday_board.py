@@ -9,6 +9,12 @@ Review, Approved Vendor, Archived), and the tracking columns, then prints
 a ready-to-paste .env block with the generated IDs. monday.com also adds a
 default "Group Title" group to every new board; delete or rename it by
 hand afterwards.
+
+This only provisions structure. Afterwards, create two board automations
+(e.g. via the monday.com UI, or the create_automation MCP tool) so
+Approved/Rejected decisions move items out of Under Review on their own:
+  - When Approval Status changes to Approved -> move item to Approved Vendor
+  - When Approval Status changes to Rejected -> move item to Archived
 """
 
 from __future__ import annotations
@@ -20,7 +26,7 @@ from app.vendors import constants
 from app.vendors.monday_client import MondayClient
 
 TEXT_COLUMNS = [
-    ("Contact Name", "text", "MONDAY_COL_CONTACT_NAME"),
+    ("Company Name", "text", "MONDAY_COL_COMPANY_NAME"),
     ("Contact Email", "email", "MONDAY_COL_CONTACT_EMAIL"),
     ("Phone", "phone", "MONDAY_COL_PHONE"),
     ("Company Address", "text", "MONDAY_COL_COMPANY_ADDRESS"),

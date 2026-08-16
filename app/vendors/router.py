@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi import APIRouter, Header, HTTPException
 
 from ..config import settings
 from . import service
@@ -24,28 +24,6 @@ router = APIRouter(tags=["vendors"])
 )
 async def submit_vendor(submission: VendorSubmission) -> VendorSubmissionResult:
     return await service.handle_new_submission(submission)
-
-
-@router.post(
-    "/webhooks/monday",
-    operation_id="receiveMondayWebhook",
-    include_in_schema=False,
-)
-async def monday_webhook(request: Request) -> dict:
-    payload = await request.json()
-
-    # monday.com sends a one-time verification handshake when a webhook is
-    # registered; it must be echoed back verbatim to activate the webhook.
-    if "challenge" in payload:
-        return {"challenge": payload["challenge"]}
-
-    if settings.monday_webhook_secret:
-        token = request.query_params.get("token")
-        if token != settings.monday_webhook_secret:
-            raise HTTPException(status_code=401, detail="Invalid webhook token.")
-
-    await service.handle_monday_event(payload.get("event", {}))
-    return {"status": "ok"}
 
 
 @router.post(

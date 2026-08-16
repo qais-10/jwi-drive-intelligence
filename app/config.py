@@ -17,37 +17,34 @@ class Settings(BaseSettings):
     max_projects_per_client: int = 100
 
     # --- Vendor approval automation (monday.com) ---
+    #
+    # Wired to the JWI "Vendor" board (workspace: CRM). The Approved/Rejected
+    # -> group move is handled by two native monday.com board automations
+    # (workflow IDs 1718627611 and 1718627615), not by this service — nothing
+    # here needs to move items between groups. Run
+    # scripts/setup_monday_board.py only if provisioning a *new* board.
 
     monday_api_token: str = ""
-    monday_board_id: str = ""
+    monday_board_id: str = "5100825568"
 
-    # Group IDs on the vendor-approval board. Populate these after running
-    # scripts/setup_monday_board.py, which creates the board and prints the
-    # generated IDs.
-    monday_group_new_submission: str = ""
-    monday_group_under_review: str = ""
-    monday_group_approved_vendor: str = ""
-    monday_group_archived: str = ""
+    monday_group_new_submission: str = "group_mm69drm1"
+    monday_group_under_review: str = "group_mm69t22b"
+    monday_group_approved_vendor: str = "topics"
+    monday_group_archived: str = "group_mm695ejb"
 
-    # Column IDs on the vendor-approval board. Also populated by
-    # scripts/setup_monday_board.py.
-    monday_col_contact_name: str = ""
-    monday_col_contact_email: str = ""
-    monday_col_phone: str = ""
-    monday_col_company_address: str = ""
-    monday_col_service_category: str = ""
-    monday_col_tax_id: str = ""
-    monday_col_submission_date: str = ""
-    monday_col_missing_fields: str = ""
-    monday_col_ai_notes: str = ""
-    monday_col_approval_status: str = ""
-    monday_col_approval_deadline: str = ""
-    monday_col_last_reminder_sent: str = ""
-
-    # Shared secret appended as ?token=... to the monday.com webhook URL.
-    # monday.com does not sign webhook payloads, so this is how we confirm
-    # inbound requests actually came from the webhook we registered.
-    monday_webhook_secret: str = ""
+    # Column IDs on the vendor-approval board.
+    monday_col_company_name: str = "text_mm5gy3dh"
+    monday_col_contact_email: str = "text_mm5gcy7t"
+    monday_col_phone: str = "phone_mm5g2yz8"
+    monday_col_company_address: str = "text_mm69hrvh"
+    monday_col_service_category: str = "text_mm69p6nq"
+    monday_col_tax_id: str = "text_mm69vs33"
+    monday_col_submission_date: str = "date_mm69ca9q"
+    monday_col_missing_fields: str = "long_text_mm69bjxw"
+    monday_col_ai_notes: str = "long_text_mm69712x"
+    monday_col_approval_status: str = "color_mm694nww"
+    monday_col_approval_deadline: str = "date_mm69ma38"
+    monday_col_last_reminder_sent: str = "date_mm69cpa6"
 
     # Shared secret expected in the X-Cron-Secret header on the deadline
     # check endpoint, e.g. from a Cloud Scheduler job.
