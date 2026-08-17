@@ -89,18 +89,15 @@ async def handle_new_submission(submission: VendorSubmission) -> VendorSubmissio
 
 
 async def _notify_slack_new_submission(submission: VendorSubmission, item_id: str) -> None:
-    if not settings.slack_bot_token or not settings.slack_channel_ops:
+    if not settings.slack_webhook_url:
         return
 
     slack = SlackClient()
     await slack.post_message(
-        settings.slack_channel_ops,
-        (
-            f":inbox_tray: New vendor submission ready for review: "
-            f"*{submission.company_name}* ({submission.contact_email})\n"
-            f"<{_item_url(item_id)}|Open in monday.com> — approval is due within "
-            f"{settings.approval_deadline_business_days} business days."
-        ),
+        f":inbox_tray: New vendor submission ready for review: "
+        f"*{submission.company_name}* ({submission.contact_email})\n"
+        f"<{_item_url(item_id)}|Open on the monday.com Vendor board> to approve or "
+        f"reject — due within {settings.approval_deadline_business_days} business days."
     )
 
 
@@ -163,16 +160,13 @@ async def check_overdue_reviews() -> DeadlineCheckResult:
         if last_reminder_text == today.isoformat():
             continue  # already reminded today
 
-        if settings.slack_bot_token and settings.slack_channel_ops:
+        if settings.slack_webhook_url:
             slack = SlackClient()
             await slack.post_message(
-                settings.slack_channel_ops,
-                (
-                    f":rotating_light: Vendor approval overdue: *{item['name']}* has been "
-                    f"awaiting a decision past its {settings.approval_deadline_business_days}-"
-                    f"business-day deadline (due {deadline.isoformat()}).\n"
-                    f"<{_item_url(item['id'])}|Review now>"
-                ),
+                f":rotating_light: Vendor approval overdue: *{item['name']}* has been "
+                f"awaiting a decision past its {settings.approval_deadline_business_days}-"
+                f"business-day deadline (due {deadline.isoformat()}). "
+                f"<{_item_url(item['id'])}|Review it on the monday.com Vendor board>."
             )
             reminders_sent += 1
 

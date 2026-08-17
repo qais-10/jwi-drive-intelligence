@@ -83,8 +83,10 @@ already provisioned (IDs default in `app/config.py`). What's still needed
 to actually run the service:
 
 1. Create a monday.com API token (Admin > API) and set `MONDAY_API_TOKEN`.
-2. Create a Slack bot with `chat:write` scope, invite it to the ops
-   channel, and set `SLACK_BOT_TOKEN` / `SLACK_CHANNEL_OPS`.
+2. In Slack: create an app (api.slack.com/apps -> Create New App -> From
+   scratch), open **Incoming Webhooks**, activate it, and **Add New Webhook
+   to Workspace** scoped to the ops channel. Set the generated URL as
+   `SLACK_WEBHOOK_URL`. No bot user, no channel invite required.
 3. Set SMTP creds (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`,
    `SMTP_PASSWORD`, `EMAIL_FROM`) for the vendor follow-up email.
 4. Schedule `POST /cron/vendor-deadlines` daily (e.g. Cloud Scheduler)

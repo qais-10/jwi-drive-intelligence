@@ -50,8 +50,9 @@ class Settings(BaseSettings):
     # check endpoint, e.g. from a Cloud Scheduler job.
     cron_secret: str = ""
 
-    slack_bot_token: str = ""
-    slack_channel_ops: str = ""
+    # Slack Incoming Webhook URL for the ops channel (Slack app -> Incoming
+    # Webhooks -> Add New Webhook to Workspace, scoped to one channel).
+    slack_webhook_url: str = ""
 
     smtp_host: str = ""
     smtp_port: int = 587

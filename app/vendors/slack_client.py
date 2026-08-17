@@ -1,57 +1,35 @@
 from __future__ import annotations
 
-from typing import Any, Optional
-
 import httpx
 from fastapi import HTTPException
 
 from ..config import settings
 
-SLACK_POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
-
 
 class SlackClient:
-    def __init__(self, bot_token: Optional[str] = None) -> None:
-        token = bot_token or settings.slack_bot_token
-        if not token:
+    """Posts to a Slack Incoming Webhook — no bot user, no channel invite.
+
+    The webhook URL is already scoped to a single channel when it's created
+    in Slack, so callers just send text.
+    """
+
+    def __init__(self, webhook_url: str | None = None) -> None:
+        self.webhook_url = webhook_url or settings.slack_webhook_url
+        if not self.webhook_url:
             raise HTTPException(
                 status_code=500,
-                detail="SLACK_BOT_TOKEN is not configured.",
+                detail="SLACK_WEBHOOK_URL is not configured.",
             )
-        self.headers = {"Authorization": f"Bearer {token}"}
 
-    async def post_message(
-        self,
-        channel: str,
-        text: str,
-        blocks: Optional[list[dict[str, Any]]] = None,
-    ) -> None:
-        payload: dict[str, Any] = {"channel": channel, "text": text}
-        if blocks:
-            payload["blocks"] = blocks
-
+    async def post_message(self, text: str) -> None:
         async with httpx.AsyncClient(timeout=15.0) as client:
-            response = await client.post(
-                SLACK_POST_MESSAGE_URL,
-                headers=self.headers,
-                json=payload,
-            )
+            response = await client.post(self.webhook_url, json={"text": text})
 
         if response.is_error:
             raise HTTPException(
                 status_code=502,
                 detail={
-                    "message": "Slack API request failed.",
+                    "message": "Slack webhook request failed.",
                     "response": response.text,
-                },
-            )
-
-        data = response.json()
-        if not data.get("ok"):
-            raise HTTPException(
-                status_code=502,
-                detail={
-                    "message": "Slack API returned an error.",
-                    "slack_response": data,
                 },
             )
