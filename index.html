@@ -158,6 +158,8 @@
     padding-bottom: var(--space-3);
   }
   .nav-contact {
+    position: relative;
+    overflow: hidden;
     font-family: var(--font-display);
     font-weight: 300;
     font-size: var(--fs-small);
@@ -165,10 +167,30 @@
     text-transform: uppercase;
     text-decoration: none;
     justify-self: start;
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.2s ease;
+    border: 1px solid var(--line-on-dark-strong);
+    padding: 0.5rem 1.05rem;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+    animation: nav-pulse 3.2s ease-in-out infinite;
+    will-change: transform;
   }
-  .nav-contact:hover { border-color: var(--line-on-dark-strong); }
+  .nav-contact:hover { border-color: var(--white); transform: translateY(-1px); }
+  .nav-contact::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -60%;
+    width: 35%; height: 100%;
+    background: linear-gradient(115deg, transparent, rgba(251, 251, 251, 0.4), transparent);
+    transform: skewX(-18deg) translateX(0);
+    animation: nav-shine 5s ease-in-out infinite;
+  }
+  @keyframes nav-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+  @keyframes nav-shine {
+    0%, 15% { transform: skewX(-18deg) translateX(0); }
+    35%, 100% { transform: skewX(-18deg) translateX(360%); }
+  }
   .nav-word {
     font-family: var(--font-display);
     font-weight: 300;
@@ -242,13 +264,33 @@
 
   .btn-block { width: 100%; justify-content: center; }
 
+  /* Sparkle on hover: transform + opacity only, sits on primary CTAs */
+  .btn { position: relative; }
+  .btn-spark {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.5rem;
+    width: 0.7rem;
+    height: 0.7rem;
+    opacity: 0;
+    transform: scale(0.3) rotate(-20deg);
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.2, 0.6, 0.2, 1);
+    pointer-events: none;
+  }
+  .btn:hover .btn-spark { opacity: 0.9; transform: scale(1) rotate(15deg); }
+
   /* ---------- Hero ---------- */
   .hero {
     padding-top: var(--space-8);
     padding-bottom: var(--space-8);
+  }
+  .hero-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
     text-align: center;
   }
-  .hero h1 {
+  .hero-copy h1 {
     font-family: var(--font-display);
     font-weight: 560;
     font-size: var(--fs-hero);
@@ -260,6 +302,54 @@
     margin: 0 auto;
   }
   .hero-actions { margin-top: var(--space-6); }
+  .hero-microcopy { margin-top: var(--space-3); font-size: var(--fs-small); opacity: 0.6; }
+
+  .hero-media { position: relative; max-width: 30rem; margin: 0 auto; }
+  .hero-media-frame {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: radial-gradient(120% 120% at 25% 12%, #4a4028 0%, var(--black) 68%);
+  }
+  .hero-media-frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(0.4) contrast(1.05);
+    transform: scale(1.1);
+    will-change: transform;
+  }
+  .booking-card {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    width: calc(100% - 2rem);
+    max-width: 15rem;
+    background: var(--beige);
+    color: var(--black);
+    border: 1px solid var(--black);
+    padding: var(--space-3);
+    text-align: left;
+  }
+  .booking-card .caption { opacity: 0.6; }
+  .booking-card-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.15rem;
+    margin-top: 0.35rem;
+    line-height: 1.3;
+  }
+  .booking-card .btn { margin-top: var(--space-3); padding: 0.65rem 1rem; }
+
+  @media (min-width: 960px) {
+    .hero-grid { flex-direction: row; align-items: center; text-align: left; }
+    .hero-copy { flex: 1.05; }
+    .hero-copy h1 { margin: 0; }
+    .hero-media { flex: 0 0 26rem; max-width: 26rem; }
+    .booking-card { left: -1.25rem; bottom: -1.25rem; }
+  }
 
   /* Hand-drawn underline swash: one-shot reveal, transform only, stays put */
   .swash-word { position: relative; display: inline-block; }
@@ -299,6 +389,7 @@
     font-size: var(--fs-stat);
     line-height: 1;
     letter-spacing: 0.002em;
+    font-variant-numeric: tabular-nums;
   }
   .stat-label {
     display: block;
@@ -336,6 +427,20 @@
   }
   .column { border-top: 1px solid var(--line-on-dark-strong); padding-top: var(--space-4); }
   .column .caption { opacity: 0.6; }
+  .column-icon {
+    width: 1.9rem;
+    height: 1.9rem;
+    margin-bottom: var(--space-3);
+    animation: bob 3.4s ease-in-out infinite;
+    will-change: transform;
+  }
+  .column:nth-child(1) .column-icon { animation-delay: 0s; }
+  .column:nth-child(2) .column-icon { animation-delay: 0.6s; }
+  .column:nth-child(3) .column-icon { animation-delay: 1.2s; }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
   .column h3 {
     font-family: var(--font-display);
     font-weight: 300;
@@ -367,15 +472,32 @@
     align-items: stretch;
   }
   .tier {
+    position: relative;
     display: flex;
     flex-direction: column;
     padding: var(--space-4);
     border: 1px solid var(--line-on-light-strong);
+    background: var(--white);
+    transition: transform 0.3s cubic-bezier(0.2, 0.6, 0.2, 1);
   }
+  .tier:hover { transform: translateY(-5px); }
   .tier-featured {
     background: var(--black);
     color: var(--white);
     border-color: var(--black);
+  }
+  .tier-featured::before {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    border: 1px solid var(--line-on-light-strong);
+    pointer-events: none;
+    animation: breathe 4.5s ease-in-out infinite;
+    will-change: transform, opacity;
+  }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.35; }
+    50% { transform: scale(1.015); opacity: 0.75; }
   }
   .tier-tag { display: block; }
   .tier h3 {
@@ -393,6 +515,9 @@
   }
   .tier-list { margin-top: var(--space-4); display: flex; flex-direction: column; gap: 0.85rem; flex-grow: 1; }
   .tier-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
     font-size: var(--fs-small);
     line-height: 1.5;
     padding-top: 0.85rem;
@@ -400,6 +525,24 @@
   }
   .tier-list li:first-child { border-top: none; padding-top: 0; }
   .tier-featured .tier-list li { border-top-color: var(--line-on-dark); }
+  .tier-check {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.15rem;
+    opacity: 1;
+    transform: scale(1);
+  }
+  html.js .tier-check {
+    opacity: 0;
+    transform: scale(0.3);
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  html.js .tier.is-visible .tier-check { opacity: 1; transform: scale(1); }
+  .tier-list li:nth-child(1) .tier-check { transition-delay: 0.15s; }
+  .tier-list li:nth-child(2) .tier-check { transition-delay: 0.28s; }
+  .tier-list li:nth-child(3) .tier-check { transition-delay: 0.41s; }
+  .tier-list li:nth-child(4) .tier-check { transition-delay: 0.54s; }
   .tier .btn { margin-top: var(--space-4); }
 
   .engagements-note {
@@ -417,7 +560,8 @@
   /* ---------- Clients (testimonials as pull-quotes) ---------- */
   .clients { padding-top: var(--space-8); padding-bottom: var(--space-8); }
   .quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
-  .quote-item { text-align: center; }
+  .quote-item { text-align: center; transition: transform 0.3s cubic-bezier(0.2, 0.6, 0.2, 1); }
+  .quote-item:hover { transform: translateY(-4px); }
   .quote-item blockquote {
     font-family: var(--font-display);
     font-weight: 300;
@@ -474,6 +618,129 @@
 
   @media (max-width: 700px) { .form-row { grid-template-columns: 1fr; } }
 
+  /* ---------- Guarantee ---------- */
+  .guarantee { padding-top: var(--space-7); padding-bottom: var(--space-7); }
+  .guarantee .section-head { margin-bottom: 0; }
+  .guarantee .caption { display: block; text-align: center; opacity: 0.6; }
+
+  /* ---------- Offer band ---------- */
+  .offer-band { padding-top: var(--space-6); padding-bottom: var(--space-6); text-align: center; }
+  .offer-band .caption { opacity: 0.55; }
+  .offer-band h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.6rem, 1.3rem + 1.6vw, 2.5rem);
+    text-transform: uppercase;
+    margin-top: var(--space-2);
+    text-wrap: balance;
+  }
+  .offer-band p { margin-top: var(--space-2); font-size: var(--fs-small); opacity: 0.75; max-width: 40ch; margin-left: auto; margin-right: auto; }
+  .offer-band .btn { margin-top: var(--space-4); }
+
+  /* ---------- FAQ ---------- */
+  .faq { padding-top: var(--space-8); padding-bottom: var(--space-8); }
+  .faq-list { max-width: 46rem; margin: 0 auto; }
+  .faq-item { border-top: 1px solid var(--line-on-light-strong); }
+  .faq-item:last-child { border-bottom: 1px solid var(--line-on-light-strong); }
+  .faq-item summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--fs-lead);
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::marker { content: ""; }
+  .faq-icon { position: relative; width: 0.85rem; height: 0.85rem; flex-shrink: 0; }
+  .faq-icon::before, .faq-icon::after {
+    content: "";
+    position: absolute;
+    background: var(--black);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .faq-icon::before { top: 50%; left: 0; width: 100%; height: 1px; transform: translateY(-50%); }
+  .faq-icon::after { left: 50%; top: 0; width: 1px; height: 100%; transform: translateX(-50%); }
+  .faq-item[open] .faq-icon::after { transform: translateX(-50%) rotate(90deg); opacity: 0; }
+  .faq-item p { padding-bottom: var(--space-4); max-width: 58ch; font-size: var(--fs-small); line-height: 1.65; opacity: 0.75; }
+
+  /* ---------- Sticky book bar ---------- */
+  body { padding-bottom: 4.25rem; }
+  .sticky-cta {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 60;
+    background: var(--black);
+    color: var(--white);
+    border-top: 1px solid var(--line-on-dark);
+    transform: translateY(0);
+  }
+  html.js .sticky-cta {
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+  html.js .sticky-cta.is-visible { transform: translateY(0); }
+  .sticky-cta-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+  .sticky-cta-text { font-size: var(--fs-small); opacity: 0.85; }
+  .sticky-cta-text strong { font-weight: 500; opacity: 1; }
+  @media (max-width: 560px) { .sticky-cta-text { display: none; } }
+
+  /* ---------- Slide-in nudge ---------- */
+  .nudge {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 5.25rem;
+    z-index: 55;
+    width: min(18rem, calc(100vw - 2.5rem));
+    background: var(--beige);
+    color: var(--black);
+    border: 1px solid var(--black);
+    padding: var(--space-3);
+    opacity: 0;
+    transform: translateY(16px);
+    pointer-events: none;
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+  .nudge.is-visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .nudge-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .nudge-title { font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; padding-right: 1.25rem; }
+  .nudge-text { margin-top: 0.35rem; font-size: var(--fs-small); opacity: 0.75; }
+  .nudge .btn { margin-top: var(--space-3); padding: 0.6rem 1rem; }
+
+  /* ---------- Scroll progress ---------- */
+  .scroll-progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    z-index: 80;
+    background: var(--white);
+    transform: scaleX(0);
+    transform-origin: 0% 50%;
+  }
+
   /* ---------- Footer ---------- */
   .site-footer { padding-top: var(--space-5); padding-bottom: var(--space-5); border-top: 1px solid var(--line-on-light); }
   .footer-row { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
@@ -488,6 +755,8 @@
 <body>
 
 <script>document.documentElement.classList.add('js');</script>
+
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
 <header class="site-header">
   <input type="checkbox" id="menu-toggle" class="menu-toggle-input">
@@ -512,13 +781,31 @@
 
   <!-- Hero -->
   <section class="hero on-dark" id="hero">
-    <div class="wrap">
-      <h1>Creative that knows your business and <span class="swash-word">stays<svg viewBox="0 0 210 22" preserveAspectRatio="none" fill="none" aria-hidden="true"><path d="M3,14.5 C 24,6 40,20 58,12 C 76,4 92,19 112,11 C 132,3 150,18 168,10 C 180,5 194,13 207,9" stroke="var(--white)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></h1>
-      <div class="hero-actions">
-        <a href="#contact" class="btn btn-on-dark">
-          Book a call
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <h1>Creative that knows your business and <span class="swash-word">stays<svg viewBox="0 0 210 22" preserveAspectRatio="none" fill="none" aria-hidden="true"><path d="M3,14.5 C 24,6 40,20 58,12 C 76,4 92,19 112,11 C 132,3 150,18 168,10 C 180,5 194,13 207,9" stroke="var(--white)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></h1>
+        <div class="hero-actions">
+          <a href="#contact" class="btn btn-on-dark">
+            Book a call
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <svg class="btn-spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0l2.2 8 8 2.2-8 2.2-2.2 8-2.2-8-8-2.2 8-2.2z"/></svg>
+          </a>
+          <p class="hero-microcopy">No cost, no commitment for the first call.</p>
+        </div>
+      </div>
+      <div class="hero-media" id="heroMedia">
+        <div class="hero-media-frame">
+          <!--
+            Add a licensed hero photo once you have one:
+            <img src="https://images.unsplash.com/photo-…" alt="…" loading="eager" onerror="this.remove()">
+            Until then this frame shows the warm gradient fallback on its own.
+          -->
+        </div>
+        <div class="booking-card">
+          <span class="caption">Next availability</span>
+          <p class="booking-card-title">30-minute strategy call</p>
+          <a href="#contact" class="btn btn-on-light btn-block">Book now</a>
+        </div>
       </div>
     </div>
   </section>
@@ -527,15 +814,15 @@
   <section class="stats on-light">
     <div class="wrap stat-row">
       <div class="stat">
-        <span class="stat-number">12+</span>
+        <span class="stat-number" data-count="12" data-suffix="+">12+</span>
         <span class="stat-label caption">Years leading regional accounts</span>
       </div>
       <div class="stat">
-        <span class="stat-number">0</span>
+        <span class="stat-number" data-count="0" data-suffix="">0</span>
         <span class="stat-label caption">Junior hand-offs on retained accounts</span>
       </div>
       <div class="stat">
-        <span class="stat-number">48hrs</span>
+        <span class="stat-number" data-count="48" data-suffix="hrs">48hrs</span>
         <span class="stat-label caption">Standard turnaround on regional adaptation</span>
       </div>
     </div>
@@ -556,16 +843,19 @@
       </div>
       <div class="columns reveal-group">
         <div class="column reveal">
+          <svg class="column-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.2" y2="16.2"/></svg>
           <span class="caption">Immersion</span>
           <h3>We learn the business before the brief</h3>
           <p>Category audits, stakeholder interviews and competitive reads across your GCC markets, before a single concept is sketched.</p>
         </div>
         <div class="column reveal">
+          <svg class="column-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
           <span class="caption">Assignment</span>
           <h3>A senior team, assigned and kept</h3>
           <p>The strategist and creative lead who scope the work are the ones who run it, quarter after quarter. No handovers, no re-briefing a junior who just joined the account.</p>
         </div>
         <div class="column reveal">
+          <svg class="column-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 4 6 4 9s-1.4 6.4-4 9c-2.6-2.6-4-6-4-9s1.4-6.4 4-9z"/></svg>
           <span class="caption">Delivery</span>
           <h3>Work built to travel</h3>
           <p>Campaigns adapted for Riyadh, Dubai and Cairo without losing what makes them work in London or New York.</p>
@@ -587,10 +877,10 @@
           <h3>Project</h3>
           <p class="tier-desc">For a single campaign, launch or brand moment with a clear start and end.</p>
           <ul class="tier-list">
-            <li>One senior strategist and creative lead</li>
-            <li>Fixed scope, timeline and deliverables</li>
-            <li>Full concept through production</li>
-            <li>One round of regional adaptation</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>One senior strategist and creative lead</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Fixed scope, timeline and deliverables</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Full concept through production</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>One round of regional adaptation</li>
           </ul>
           <a href="#contact" class="btn btn-on-light btn-block">Scope a project</a>
         </div>
@@ -599,27 +889,55 @@
           <h3>Embedded Retainer</h3>
           <p class="tier-desc">An embedded senior team running your brand and campaign work, month to month.</p>
           <ul class="tier-list">
-            <li>Dedicated strategist and creative lead, retained</li>
-            <li>No junior rotation, ever</li>
-            <li>Quarterly business reviews with your leadership</li>
-            <li>Priority turnaround, regional and global</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Dedicated strategist and creative lead, retained</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>No junior rotation, ever</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Quarterly business reviews with your leadership</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Priority turnaround, regional and global</li>
           </ul>
-          <a href="#contact" class="btn btn-on-dark btn-block">Start a retainer</a>
+          <a href="#contact" class="btn btn-on-dark btn-block">
+            Start a retainer
+            <svg class="btn-spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0l2.2 8 8 2.2-8 2.2-2.2 8-2.2-8-8-2.2 8-2.2z"/></svg>
+          </a>
         </div>
         <div class="tier reveal">
           <span class="tier-tag caption">Multi-market</span>
           <h3>Partnership</h3>
           <p class="tier-desc">Agency-of-record across your GCC and international markets.</p>
           <ul class="tier-list">
-            <li>Senior pod dedicated across markets</li>
-            <li>Embedded with your in-house marketing team</li>
-            <li>Direct strategic counsel to your CMO</li>
-            <li>Custom governance and reporting cadence</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Senior pod dedicated across markets</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Embedded with your in-house marketing team</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Direct strategic counsel to your CMO</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Custom governance and reporting cadence</li>
           </ul>
           <a href="#contact" class="btn btn-on-light btn-block">Discuss a partnership</a>
         </div>
       </div>
       <p class="engagements-note reveal">Every engagement starts with a scoping call. There's no rate card, because no two accounts run the same way.</p>
+    </div>
+  </section>
+
+  <!-- Guarantee -->
+  <section class="guarantee on-beige">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="caption">Risk Reversal</span>
+        <h2 class="section-title">The Continuity Guarantee</h2>
+        <p class="section-lead">If the senior lead on your account ever changes, JWI covers the transition at no cost to you. Step back from a retainer with thirty days' notice. No lock-in, no penalty.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Offer band -->
+  <section class="offer-band on-dark">
+    <div class="wrap">
+      <span class="caption">Limited Availability</span>
+      <h2>Your first strategy session is complimentary</h2>
+      <p>No cost, no commitment. A senior strategist walks through where your account stands and where JWI would start.</p>
+      <a href="#contact" class="btn btn-on-dark">
+        Claim your session
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        <svg class="btn-spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0l2.2 8 8 2.2-8 2.2-2.2 8-2.2-8-8-2.2 8-2.2z"/></svg>
+      </a>
     </div>
   </section>
 
@@ -642,6 +960,34 @@
           <blockquote><span class="paren">(</span>&nbsp;Campaigns that read as regionally sharp and internationally consistent, not adapted after the fact.&nbsp;<span class="paren">)</span></blockquote>
           <cite>CMO, International Consumer Electronics Brand</cite>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq on-light" id="faq">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="caption">Before You Book</span>
+        <h2 class="section-title">Common Questions</h2>
+      </div>
+      <div class="faq-list reveal-group">
+        <details class="faq-item reveal">
+          <summary>How is this different from our current agency?<span class="faq-icon" aria-hidden="true"></span></summary>
+          <p>Most agencies rotate junior staff onto your account within a year. At JWI, the senior strategist and creative lead who scope your work are the ones who run it, quarter after quarter.</p>
+        </details>
+        <details class="faq-item reveal">
+          <summary>We're weighing whether to bring creative in-house. Why keep an agency?<span class="faq-icon" aria-hidden="true"></span></summary>
+          <p>An in-house team solves for headcount, not judgement. JWI pairs your business context with senior strategists who've built regional and international campaigns for years, without the overhead of hiring, retaining and managing that team yourself.</p>
+        </details>
+        <details class="faq-item reveal">
+          <summary>Can a GCC-based team really match global creative standards?<span class="faq-icon" aria-hidden="true"></span></summary>
+          <p>JWI's senior leads have built campaigns across the GCC and internationally. Every piece of work is held to one craft standard, adapted locally, not diluted for the region.</p>
+        </details>
+        <details class="faq-item reveal">
+          <summary>Do we need to sign a long-term contract?<span class="faq-icon" aria-hidden="true"></span></summary>
+          <p>No. Project engagements are scoped and fixed. Retainers run month to month, with thirty days' notice to step back, covered under our Continuity Guarantee.</p>
+        </details>
       </div>
     </div>
   </section>
@@ -675,6 +1021,7 @@
         <button type="submit" class="btn btn-on-dark btn-block">
           Send enquiry
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          <svg class="btn-spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0l2.2 8 8 2.2-8 2.2-2.2 8-2.2-8-8-2.2 8-2.2z"/></svg>
         </button>
       </form>
       <div class="contact-detail reveal">
@@ -702,19 +1049,131 @@
   <p class="footer-fine">© 2026 JWI. All rights reserved.</p>
 </footer>
 
+<div class="sticky-cta" id="stickyCta">
+  <div class="wrap sticky-cta-inner">
+    <p class="sticky-cta-text"><strong>Only 2 senior teams</strong>&nbsp;onboarding this quarter.</p>
+    <a href="#contact" class="btn btn-on-dark">
+      Book a call
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      <svg class="btn-spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0l2.2 8 8 2.2-8 2.2-2.2 8-2.2-8-8-2.2 8-2.2z"/></svg>
+    </a>
+  </div>
+</div>
+
+<div class="nudge" id="nudge" role="dialog" aria-label="Still deciding">
+  <button type="button" class="nudge-close" id="nudgeClose" aria-label="Dismiss">×</button>
+  <p class="nudge-title">Still deciding?</p>
+  <p class="nudge-text">Your first strategy session is complimentary.</p>
+  <a href="#contact" class="btn btn-on-dark btn-block">Book a call</a>
+</div>
+
 <script>
   (function () {
-    if (!('IntersectionObserver' in window)) return;
-    var els = document.querySelectorAll('.reveal');
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          io.unobserve(entry.target);
-        }
+    /* Reveal-on-scroll */
+    if ('IntersectionObserver' in window) {
+      var revealIo = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            revealIo.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+      document.querySelectorAll('.reveal').forEach(function (el) { revealIo.observe(el); });
+    }
+
+    /* Close mobile menu after choosing a section */
+    var menuToggle = document.getElementById('menu-toggle');
+    if (menuToggle) {
+      document.querySelectorAll('.menu-panel-inner a').forEach(function (a) {
+        a.addEventListener('click', function () { menuToggle.checked = false; });
       });
-    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
-    els.forEach(function (el) { io.observe(el); });
+    }
+
+    /* Count-up on stat numbers, once, when they scroll in */
+    if ('IntersectionObserver' in window) {
+      var statIo = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          var el = entry.target;
+          var target = parseInt(el.getAttribute('data-count'), 10) || 0;
+          var suffix = el.getAttribute('data-suffix') || '';
+          var duration = 1100;
+          var start = null;
+          function tick(ts) {
+            if (start === null) start = ts;
+            var progress = Math.min((ts - start) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(eased * target) + suffix;
+            if (progress < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+          statIo.unobserve(el);
+        });
+      }, { threshold: 0.6 });
+      document.querySelectorAll('.stat-number').forEach(function (el) { statIo.observe(el); });
+    }
+
+    /* Scroll-linked: progress bar, hero parallax, sticky bar visibility */
+    var progressBar = document.getElementById('scrollProgress');
+    var heroMedia = document.getElementById('heroMedia');
+    var heroImg = heroMedia ? heroMedia.querySelector('img') : null;
+    var hero = document.getElementById('hero');
+    var stickyCta = document.getElementById('stickyCta');
+    var ticking = false;
+
+    function onScroll() {
+      var scrollTop = window.scrollY || document.documentElement.scrollTop;
+      var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      var progress = docHeight > 0 ? Math.min(Math.max(scrollTop / docHeight, 0), 1) : 0;
+      if (progressBar) progressBar.style.transform = 'scaleX(' + progress + ')';
+
+      if (heroImg && hero) {
+        var heroRect = hero.getBoundingClientRect();
+        if (heroRect.bottom > 0 && heroRect.top < window.innerHeight) {
+          var offset = heroRect.top * -0.08;
+          heroImg.style.transform = 'scale(1.1) translateY(' + offset + 'px)';
+        }
+      }
+
+      if (stickyCta && hero) {
+        var pastHero = hero.getBoundingClientRect().bottom < 0;
+        stickyCta.classList.toggle('is-visible', pastHero);
+      }
+
+      ticking = false;
+    }
+    function requestTick() {
+      if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+    }
+    window.addEventListener('scroll', requestTick, { passive: true });
+    onScroll();
+
+    /* One-time slide-in nudge after scrolling past pricing */
+    var nudge = document.getElementById('nudge');
+    var nudgeClose = document.getElementById('nudgeClose');
+    var guaranteeSection = document.querySelector('.guarantee');
+    if (nudge && guaranteeSection && 'IntersectionObserver' in window) {
+      var nudgeShown = false;
+      try { nudgeShown = sessionStorage.getItem('jwiNudgeShown') === '1'; } catch (e) {}
+      if (!nudgeShown) {
+        var nudgeIo = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              nudge.classList.add('is-visible');
+              try { sessionStorage.setItem('jwiNudgeShown', '1'); } catch (e) {}
+              nudgeIo.disconnect();
+            }
+          });
+        }, { threshold: 0.2 });
+        nudgeIo.observe(guaranteeSection);
+      }
+    }
+    if (nudgeClose) {
+      nudgeClose.addEventListener('click', function () {
+        nudge.classList.remove('is-visible');
+      });
+    }
   })();
 </script>
 
