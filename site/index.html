@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JWI: Creative Marketing Agency</title>
-<meta name="description" content="JWI is a creative marketing agency for operators who answer to a board, a franchisee network, or a founder's name on the door. Strategy, brand, and campaigns built for measurable outcomes.">
+<meta name="description" content="JWI is an independent creative marketing agency for founder-led brands who want a strategist, not a committee. Strategy, brand, and campaigns built from scratch, in-house, every time.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Hanken+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -402,45 +402,6 @@
   }
   .hero-secondary:hover{border-color:var(--beige);}
 
-  /* ---------- BY THE NUMBERS ---------- */
-  .numbers{
-    background:var(--white);
-    color:var(--black);
-    padding:var(--space-8) var(--space-5);
-  }
-  .numbers-inner{
-    max-width:1000px;margin:0 auto;
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    border-top:1px solid rgba(20,20,20,.15);
-    border-left:1px solid rgba(20,20,20,.15);
-  }
-  .number-cell{
-    border-right:1px solid rgba(20,20,20,.15);
-    border-bottom:1px solid rgba(20,20,20,.15);
-    padding:var(--space-7) var(--space-4);
-    text-align:center;
-  }
-  .number-stat{
-    display:block;
-    font-family:var(--font-display);
-    font-weight:400;
-    font-variation-settings:"opsz" 60,"SOFT" 0,"WONK" 0;
-    font-size:var(--text-2xl);
-    line-height:1;
-    margin-bottom:var(--space-3);
-    font-variant-numeric:tabular-nums;
-  }
-  .number-label{
-    font-size:var(--text-xs);
-    letter-spacing:.06em;
-    text-transform:uppercase;
-    opacity:.6;
-  }
-  @media (max-width:640px){
-    .numbers-inner{grid-template-columns:1fr;}
-  }
-
   /* ---------- TRUSTED ---------- */
   .trusted{
     background:var(--beige);
@@ -686,91 +647,59 @@
     opacity:.5;
   }
 
-  /* ---------- PRICING ---------- */
-  .pricing{
-    background:var(--white);
-    padding:var(--space-10) var(--space-5);
-  }
-  .pricing-inner{max-width:1200px;margin:0 auto;}
-  .pricing-head{text-align:center;margin-bottom:var(--space-9);}
-  .pricing-head .eyebrow{opacity:.55;display:block;margin-bottom:var(--space-5);}
-  .pricing-head .headline{font-size:var(--text-3xl);}
-  .pricing-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:var(--space-6);
-    align-items:stretch;
-  }
-  .tier{
-    border:1px solid rgba(20,20,20,.18);
-    padding:var(--space-7) var(--space-6);
-    display:flex;flex-direction:column;
-    gap:var(--space-5);
-  }
-  .tier-featured{
+  /* ---------- WHY INDEPENDENT ---------- */
+  .indie{
     background:var(--black);
     color:var(--beige);
-    border-color:var(--black);
-    position:relative;
+    padding:var(--space-10) var(--space-5);
   }
-  @media (prefers-reduced-motion:no-preference){
-    .tier-featured{animation:tier-breathe 5s ease-in-out infinite;}
-    .tier-featured:hover{animation-play-state:paused;}
+  .indie-inner{max-width:900px;margin:0 auto;}
+  .indie-head{margin-bottom:var(--space-9);}
+  .indie-head .eyebrow{color:var(--beige);opacity:.65;display:block;margin-bottom:var(--space-5);text-align:center;}
+  .indie-head .headline{color:var(--beige);font-size:var(--text-3xl);}
+  .indie-table{border-top:1px solid rgba(251,251,251,.2);}
+  .indie-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border-bottom:1px solid rgba(251,251,251,.2);
   }
-  @keyframes tier-breathe{
-    0%,100%{transform:scale(1);}
-    50%{transform:scale(1.012);}
+  .indie-row > div{
+    padding:var(--space-5) var(--space-6);
   }
-  .tier-tag{
-    position:absolute;
-    top:calc(-1 * var(--space-4));
-    left:50%;transform:translateX(-50%);
-    background:var(--beige);
-    color:var(--black);
+  .indie-row .most{
+    color:var(--beige);
+    opacity:.4;
+    text-decoration:line-through;
+    text-decoration-color:rgba(251,251,251,.35);
+  }
+  .indie-row .jwi{
+    border-left:1px solid rgba(251,251,251,.2);
+    font-weight:500;
+  }
+  .indie-row-label{
+    display:none;
     font-size:var(--text-xs);
-    letter-spacing:.1em;
+    letter-spacing:.12em;
     text-transform:uppercase;
-    padding:var(--space-2) var(--space-4);
+    opacity:.45;
+    margin-bottom:var(--space-2);
   }
-  .tier-name{
-    font-family:var(--font-display);
-    font-weight:400;
-    font-size:var(--text-xl);
+  .indie-table-head{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    font-size:var(--text-xs);
+    letter-spacing:.12em;
     text-transform:uppercase;
+    opacity:.5;
   }
-  .tier-price{
-    font-family:var(--font-display);
-    font-weight:400;
-    font-variation-settings:"opsz" 40,"SOFT" 0,"WONK" 0;
-    font-size:var(--text-2xl);
-  }
-  .tier-desc{
-    font-size:var(--text-sm);
-    font-weight:300;
-    opacity:.75;
-  }
-  .tier-list{
-    display:flex;flex-direction:column;gap:var(--space-3);
-    flex:1;
-  }
-  .tier-list li{
-    display:flex;align-items:flex-start;gap:var(--space-3);
-    font-size:var(--text-sm);
-    font-weight:300;
-  }
-  .tier-check{
-    flex:none;width:16px;height:16px;margin-top:3px;
-    transition:opacity .4s var(--ease),transform .4s var(--ease);
-  }
-  .tier-list li:nth-child(1) .tier-check{transition-delay:.05s;}
-  .tier-list li:nth-child(2) .tier-check{transition-delay:.18s;}
-  .tier-list li:nth-child(3) .tier-check{transition-delay:.31s;}
-  .tier-list li:nth-child(4) .tier-check{transition-delay:.44s;}
-  .tier-list li:nth-child(5) .tier-check{transition-delay:.57s;}
-  .tier .btn{align-self:stretch;justify-content:center;margin-top:var(--space-2);}
-  @media (max-width:900px){
-    .pricing-grid{grid-template-columns:1fr;}
-    .tier-featured{animation:none !important;}
+  .indie-table-head > div{padding:0 var(--space-6) var(--space-4);}
+  .indie-table-head .jwi{border-left:1px solid rgba(251,251,251,.2);}
+  @media (max-width:640px){
+    .indie-table-head{display:none;}
+    .indie-row{grid-template-columns:1fr;border-bottom:none;}
+    .indie-row > div{border-bottom:1px solid rgba(251,251,251,.12);}
+    .indie-row .jwi{border-left:none;}
+    .indie-row-label{display:block;}
   }
 
   /* ---------- FAQ ---------- */
@@ -982,13 +911,10 @@
     opacity:1;transform:translateY(0);
     transition:opacity .7s var(--ease),transform .7s var(--ease);
   }
-  .tier-list.js-armed .tier-check{opacity:0;transform:scale(.4);}
-  .tier-list.js-armed.revealed .tier-check{opacity:1;transform:scale(1);}
-
   @media (prefers-reduced-motion:reduce){
     html{scroll-behavior:auto;}
     *,*::before,*::after{transition:none !important;animation:none !important;}
-    .reveal-init.js-armed,.tier-list.js-armed .tier-check{opacity:1 !important;transform:none !important;}
+    .reveal-init.js-armed{opacity:1 !important;transform:none !important;}
   }
 </style>
 </head>
@@ -1007,7 +933,7 @@
       <a href="#outcomes">Outcomes</a>
       <a href="#process">Process</a>
       <a href="#proof">Proof</a>
-      <a href="#pricing">Pricing</a>
+      <a href="#independent">Independent</a>
       <a href="#faq">FAQ</a>
     </nav>
 
@@ -1029,7 +955,7 @@
     <div class="hero-inner">
       <div class="hero-grid">
         <div class="hero-copy">
-          <span class="eyebrow">Creative Marketing Agency</span>
+          <span class="eyebrow">Independent Creative Agency</span>
           <h1 class="headline">Strategy that moves
             <span class="swash">markets<svg class="swash-svg" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true">
               <path class="swash-path" d="M3 12 C 24 3, 40 19, 62 9 C 84 1, 100 17, 122 8 C 144 1, 160 16, 182 8 C 190 5, 195 9, 197 7" fill="none" stroke-width="3" stroke-linecap="round"/>
@@ -1060,51 +986,33 @@
     </div>
   </section>
 
-  <!-- BY THE NUMBERS -->
-  <section class="numbers" id="numbers">
-    <div class="numbers-inner reveal-init">
-      <div class="number-cell lift">
-        <span class="number-stat count-target">900+</span>
-        <span class="number-label">Projects delivered for clients</span>
-      </div>
-      <div class="number-cell lift">
-        <span class="number-stat count-target">4.9&#9733;</span>
-        <span class="number-label">Average client rating</span>
-      </div>
-      <div class="number-cell lift">
-        <span class="number-stat count-target">7 Days</span>
-        <span class="number-label">From signed brief to first deliverable</span>
-      </div>
-    </div>
-  </section>
-
   <!-- TRUST BADGES -->
   <section class="trusted" id="trusted">
     <div class="trusted-inner reveal-init">
-      <span class="eyebrow">Trusted by operators across the region</span>
+      <span class="eyebrow">Independent by design, not by accident</span>
       <div class="badge-grid">
         <div class="badge lift">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
           <span class="badge-stat count-target">14</span>
-          <span class="badge-label">Years building brands in this region</span>
+          <span class="badge-label">Years running independently, no holding company</span>
         </div>
         <div class="badge lift">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V10M11 19V5M18 19v-7M4 19h16"/></svg>
-          <span class="badge-stat count-target">180+</span>
-          <span class="badge-label">Campaigns launched to date</span>
-        </div>
-        <div class="badge lift">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.7-6.5-11a6.5 6.5 0 0 1 13 0c0 5.3-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.2"/></svg>
-          <span class="badge-stat count-target">3</span>
-          <span class="badge-label">Markets served under one strategy</span>
+          <span class="badge-stat count-target">8</span>
+          <span class="badge-label">New clients we take on in a typical year</span>
         </div>
         <div class="badge lift">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="3"/><circle cx="17" cy="10" r="2.4"/><path d="M2.5 20c.6-3.3 3-5 5.5-5s4.9 1.7 5.5 5M14.8 15.3c1.9.2 3.7 1.7 4.2 4.7"/></svg>
           <span class="badge-stat count-target">100%</span>
-          <span class="badge-label">In-house strategists and creatives</span>
+          <span class="badge-label">Of the work made in-house, nothing subcontracted</span>
+        </div>
+        <div class="badge lift">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17.3l-5.4 3 1.4-6L3 9.8l6.1-.5L12 3.5l2.9 5.8 6.1.5-5 4.5 1.4 6z"/></svg>
+          <span class="badge-stat count-target">4.9&#9733;</span>
+          <span class="badge-label">Average client rating, from founders we work with directly</span>
         </div>
       </div>
-      <p class="client-line">Working with Meridian Capital &middot; Coastline Hospitality Group &middot; Vantage Retail Partners &middot; Northbridge Financial</p>
+      <p class="client-line">Working with Coastline Hospitality Group &middot; N&ordm;9 Skincare &middot; Vantage Goods &middot; Marlow &amp; Finch</p>
     </div>
   </section>
 
@@ -1199,13 +1107,13 @@
         </div>
         <div class="quote-cell reveal-init lift">
           <span class="index-mark">02</span>
-          <blockquote><span class="paren">(</span>Every dollar we spent, we could trace to a result. That never happened before JWI.<span class="paren">)</span></blockquote>
-          <cite class="quote-cite">N. Okafor, CFO<br>Meridian Capital</cite>
+          <blockquote><span class="paren">(</span>Every dollar we spent, we could trace to a result. That never happened with the big agency we used before.<span class="paren">)</span></blockquote>
+          <cite class="quote-cite">N. Okafor, Founder<br>N&ordm;9 Skincare</cite>
         </div>
         <div class="quote-cell reveal-init lift">
           <span class="index-mark">03</span>
-          <blockquote><span class="paren">(</span>We stopped guessing. Every campaign now ties back to a number on the P&amp;L.<span class="paren">)</span></blockquote>
-          <cite class="quote-cite">S. Patel, VP Marketing<br>Vantage Retail Partners</cite>
+          <blockquote><span class="paren">(</span>No account manager relay, no junior team learning on our budget. Just two people who knew the brand cold.<span class="paren">)</span></blockquote>
+          <cite class="quote-cite">S. Patel, Co-Founder<br>Vantage Goods</cite>
         </div>
       </div>
     </div>
@@ -1222,51 +1130,33 @@
     </div>
   </section>
 
-  <!-- PRICING -->
-  <section class="pricing" id="pricing">
-    <div class="pricing-inner">
-      <div class="pricing-head reveal-init">
-        <span class="eyebrow eyebrow-rule">Ways to work with us</span>
-        <h2 class="headline">Choose the level of partnership that fits</h2>
+  <!-- WHY INDEPENDENT -->
+  <section class="indie" id="independent">
+    <div class="indie-inner">
+      <div class="indie-head reveal-init">
+        <span class="eyebrow eyebrow-rule">Why independent</span>
+        <h2 class="headline">We turned down the holding company. Twice.</h2>
       </div>
-      <div class="pricing-grid">
-        <div class="tier reveal-init lift">
-          <span class="tier-name">Foundations</span>
-          <span class="tier-price">From $5,000</span>
-          <p class="tier-desc">A one-time strategy sprint for teams who need clarity before they need a campaign.</p>
-          <ul class="tier-list reveal-init">
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Brand and market audit</li>
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Positioning workshop</li>
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Ninety day roadmap</li>
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>One core campaign concept</li>
-          </ul>
-          <a class="btn btn-outline-black" href="#quote">Get a Quote</a>
+      <div class="indie-table reveal-init">
+        <div class="indie-table-head">
+          <div>Most agencies</div>
+          <div class="jwi">JWI</div>
         </div>
-        <div class="tier tier-featured reveal-init lift">
-          <span class="tier-tag">Most popular</span>
-          <span class="tier-name">Growth Partner</span>
-          <span class="tier-price">From $9,500/mo</span>
-          <p class="tier-desc">An always-on retainer for operators who need a marketing engine, not a project.</p>
-          <ul class="tier-list reveal-init">
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Everything in Foundations</li>
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Always-on campaign management</li>
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Dedicated strategist and creative team</li>
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Monthly reporting tied to revenue</li>
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Priority turnaround</li>
-          </ul>
-          <a class="btn btn-solid-beige" href="#quote">Get a Quote</a>
+        <div class="indie-row">
+          <div class="most"><span class="indie-row-label">Most agencies</span>Your strategist changes with every renewal</div>
+          <div class="jwi"><span class="indie-row-label">JWI</span>Same two people from kickoff to year three</div>
         </div>
-        <div class="tier reveal-init lift">
-          <span class="tier-name">Full-Service</span>
-          <span class="tier-price">Custom</span>
-          <p class="tier-desc">For multi-market operators who need JWI embedded as their marketing department.</p>
-          <ul class="tier-list reveal-init">
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Everything in Growth Partner</li>
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Multi-market coordination</li>
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Executive strategy sessions</li>
-            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Quarterly business reviews</li>
-          </ul>
-          <a class="btn btn-outline-black" href="#quote">Get a Quote</a>
+        <div class="indie-row">
+          <div class="most"><span class="indie-row-label">Most agencies</span>Senior staff pitch, junior staff execute</div>
+          <div class="jwi"><span class="indie-row-label">JWI</span>The person who sold you the work makes the work</div>
+        </div>
+        <div class="indie-row">
+          <div class="most"><span class="indie-row-label">Most agencies</span>Owned by a network, answers to shareholders</div>
+          <div class="jwi"><span class="indie-row-label">JWI</span>Owned by the people doing the work, answers to you</div>
+        </div>
+        <div class="indie-row">
+          <div class="most"><span class="indie-row-label">Most agencies</span>One template, a different logo dropped in</div>
+          <div class="jwi"><span class="indie-row-label">JWI</span>Every strategy built from a blank page</div>
         </div>
       </div>
     </div>
@@ -1290,7 +1180,7 @@
           <summary>Do you work with our industry?
             <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
           </summary>
-          <p>We have built strategy for retail, hospitality, financial services, wellness, and logistics operators. What matters more than your sector is whether you are ready to commit to a strategy long enough to see it work.</p>
+          <p>We have built strategy for independent hospitality groups, founder-led retail and beauty brands, and boutique wellness studios. What matters more than your sector is whether you are the one making the decisions, not a committee three layers removed from the work.</p>
         </details>
         <details class="faq-item">
           <summary>What is included in a quote?
@@ -1326,7 +1216,7 @@
           <summary>Is this affordable for a business our size?
             <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
           </summary>
-          <p>The Foundations package exists for exactly this reason, a fixed one-time cost with no retainer required. Most clients start there and move into a retainer once they see the roadmap in action.</p>
+          <p>We do not publish flat packages, because a franchise group and a single boutique studio need different things from us. We take on eight new clients a year by design, so every quote is scoped to what your business can actually put to work, not upsold to fit a rate card.</p>
         </details>
       </div>
     </div>
@@ -1480,10 +1370,11 @@
         requestAnimationFrame(step);
       }
 
-      // Slide-in nudge: fires once, after the visitor has scrolled past pricing
+      // Slide-in nudge: fires once, after the visitor has scrolled past the
+      // guarantee section (the last major persuasion point before the FAQ)
       var nudge = document.getElementById('nudge');
       var nudgeClose = document.getElementById('nudgeClose');
-      var pricingSection = document.getElementById('pricing');
+      var nudgeTriggerSection = document.getElementById('guarantee');
       var nudgeStorageKey = 'jwiNudgeShown';
       var nudgeShown = false;
       try { nudgeShown = localStorage.getItem(nudgeStorageKey) === '1'; } catch(e){}
@@ -1500,19 +1391,19 @@
       }
       if(nudgeClose){ nudgeClose.addEventListener('click', hideNudge); }
 
-      if(pricingSection && !nudgeShown){
-        var seenPricing = false;
-        var pricingIo = new IntersectionObserver(function(entries){
+      if(nudgeTriggerSection && !nudgeShown){
+        var seenTrigger = false;
+        var nudgeIo = new IntersectionObserver(function(entries){
           entries.forEach(function(entry){
             if(entry.isIntersecting){
-              seenPricing = true;
-            } else if(seenPricing && entry.boundingClientRect.bottom < 0){
+              seenTrigger = true;
+            } else if(seenTrigger && entry.boundingClientRect.bottom < 0){
               showNudge();
-              pricingIo.unobserve(entry.target);
+              nudgeIo.unobserve(entry.target);
             }
           });
         }, { threshold: 0 });
-        pricingIo.observe(pricingSection);
+        nudgeIo.observe(nudgeTriggerSection);
       }
     }
 
