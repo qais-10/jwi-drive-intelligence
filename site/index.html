@@ -39,6 +39,7 @@
     --text-hero:clamp(3.25rem,2.1rem + 5.8vw,7.5rem);
 
     --nav-h:76px;
+    --bar-h:64px;
     --ease:cubic-bezier(.22,.61,.36,1);
   }
 
@@ -68,6 +69,19 @@
   .skip-link:focus{left:var(--space-4);top:var(--space-4);}
 
   section{scroll-margin-top:var(--nav-h);}
+
+  body{padding-bottom:var(--bar-h);}
+
+  .scroll-progress{
+    position:fixed;top:0;left:0;
+    width:100%;height:3px;
+    background:var(--beige);
+    transform:scaleX(0);
+    transform-origin:0 0;
+    z-index:130;
+    pointer-events:none;
+    will-change:transform;
+  }
 
   .eyebrow{
     font-family:var(--font-body);
@@ -116,6 +130,7 @@
   }
 
   .btn{
+    position:relative;
     display:inline-flex;
     align-items:center;
     gap:var(--space-2);
@@ -130,12 +145,27 @@
     white-space:nowrap;
   }
   .btn:hover{transform:translateY(-3px);}
+  .btn-sparkle{
+    position:absolute;
+    top:-9px;right:-9px;
+    width:16px;height:16px;
+    opacity:0;
+    transform:scale(.4) rotate(-12deg);
+    transition:opacity .3s var(--ease),transform .3s var(--ease);
+    pointer-events:none;
+  }
+  .btn:hover .btn-sparkle{opacity:1;transform:scale(1) rotate(8deg);}
+
+  .lift{transition:transform .3s var(--ease),border-color .3s var(--ease);}
+  .lift:hover{transform:translateY(-6px);}
   .btn-solid-beige{background:var(--beige);color:var(--black);border-color:var(--beige);}
   .btn-solid-beige:hover{background:var(--white);border-color:var(--white);}
   .btn-outline-beige{background:transparent;color:var(--beige);border-color:var(--beige);}
   .btn-outline-beige:hover{background:var(--beige);color:var(--black);}
   .btn-solid-black{background:var(--black);color:var(--white);border-color:var(--black);}
   .btn-solid-black:hover{background:transparent;color:var(--black);}
+  .btn-outline-black{background:transparent;color:var(--black);border-color:var(--black);}
+  .btn-outline-black:hover{background:var(--black);color:var(--white);}
 
   /* ---------- NAV ---------- */
   .nav{
@@ -159,7 +189,7 @@
   }
   .nav-links{
     display:flex;
-    gap:var(--space-7);
+    gap:var(--space-6);
   }
   .nav-links a{
     font-size:var(--text-sm);
@@ -184,7 +214,7 @@
   .nav-toggle-input:checked ~ .nav-actions .icon-open{display:none;}
   .nav-toggle-input:checked ~ .nav-actions .icon-close{display:block;}
 
-  @media (max-width:860px){
+  @media (max-width:980px){
     .nav-links{
       position:absolute;
       top:var(--nav-h);left:0;right:0;
@@ -201,9 +231,35 @@
       width:100%;
       border-bottom:1px solid rgba(251,251,251,.08);
     }
-    .nav-toggle-input:checked ~ .nav-links{max-height:320px;}
+    .nav-toggle-input:checked ~ .nav-links{max-height:420px;}
     .nav-toggle-label{display:flex;}
     .btn-quote-label{display:none;}
+  }
+
+  /* Nav pinned CTA: gentle pulse + shine */
+  .btn-quote-label{position:relative;overflow:hidden;}
+  .btn-quote-label:hover{animation-play-state:paused;}
+  .btn-quote-label:hover::after{animation-play-state:paused;}
+  .btn-quote-label::after{
+    content:"";
+    position:absolute;
+    top:0;left:-60%;
+    width:35%;height:100%;
+    background:linear-gradient(75deg,transparent,rgba(20,20,20,.28),transparent);
+    pointer-events:none;
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .btn-quote-label{animation:cta-pulse 2.8s ease-in-out infinite;}
+    .btn-quote-label::after{animation:cta-shine 5s ease-in-out infinite;}
+  }
+  @keyframes cta-pulse{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.035);}
+  }
+  @keyframes cta-shine{
+    0%{transform:translateX(0);}
+    14%{transform:translateX(340%);}
+    100%{transform:translateX(340%);}
   }
 
   /* ---------- HERO ---------- */
@@ -230,16 +286,87 @@
     pointer-events:none;
     user-select:none;
     white-space:nowrap;
+    will-change:transform;
   }
-  .hero-inner{position:relative;max-width:900px;margin:0 auto;}
-  .hero .eyebrow{color:var(--beige);opacity:.75;display:block;margin-bottom:var(--space-6);}
-  .hero .headline{
+  @media (prefers-reduced-motion:no-preference){
+    .hero-mark{animation:hero-mark-drift 14s ease-in-out infinite;}
+  }
+  @keyframes hero-mark-drift{
+    0%,100%{transform:translate(-50%,-56%) scale(1);}
+    50%{transform:translate(-50%,-58%) scale(1.03);}
+  }
+  .hero-inner{position:relative;max-width:1200px;margin:0 auto;}
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    align-items:center;
+    gap:var(--space-9);
+    text-align:left;
+  }
+  .hero-copy .eyebrow{color:var(--beige);opacity:.75;display:block;margin-bottom:var(--space-6);}
+  .hero-copy .headline{
     font-size:var(--text-hero);
     font-weight:400;
     letter-spacing:-.02em;
     line-height:1.04;
     color:var(--beige);
-    max-width:16ch;
+    max-width:12ch;
+    margin:0;
+    text-align:left;
+  }
+  @media (max-width:900px){
+    .hero-grid{grid-template-columns:1fr;text-align:center;gap:var(--space-8);}
+    .hero-copy .headline{margin:0 auto;text-align:center;max-width:16ch;}
+  }
+
+  .hero-media{position:relative;}
+  .hero-media-frame{
+    position:relative;
+    aspect-ratio:4/5;
+    overflow:hidden;
+    background:linear-gradient(155deg,var(--beige) 0%,var(--black) 130%);
+  }
+  .hero-media-frame img{
+    position:absolute;
+    top:-9%;left:0;
+    width:100%;height:118%;
+    object-fit:cover;
+    filter:grayscale(1) contrast(1.08) brightness(.96);
+    will-change:transform;
+  }
+  .hero-booking-card{
+    position:absolute;
+    left:calc(-1 * var(--space-6));
+    bottom:calc(-1 * var(--space-6));
+    background:var(--beige);
+    color:var(--black);
+    border:1px solid var(--black);
+    padding:var(--space-5);
+    width:min(220px,58%);
+    display:flex;flex-direction:column;gap:var(--space-3);
+  }
+  .hero-booking-label{
+    font-family:var(--font-display);
+    font-weight:400;
+    font-size:var(--text-md);
+    line-height:1.2;
+  }
+  .hero-booking-sub{
+    font-size:var(--text-xs);
+    opacity:.65;
+    letter-spacing:.03em;
+  }
+  .hero-booking-card .btn{
+    align-self:flex-start;
+    padding:var(--space-2) var(--space-4);
+    font-size:var(--text-xs);
+  }
+  @media (max-width:520px){
+    .hero-booking-card{
+      position:static;
+      width:100%;
+      margin-top:var(--space-5);
+    }
   }
   .swash{position:relative;display:inline-block;white-space:nowrap;}
   .swash-svg{
@@ -302,6 +429,7 @@
     font-size:var(--text-2xl);
     line-height:1;
     margin-bottom:var(--space-3);
+    font-variant-numeric:tabular-nums;
   }
   .number-label{
     font-size:var(--text-xs);
@@ -335,7 +463,7 @@
     display:flex;flex-direction:column;align-items:center;gap:var(--space-3);
   }
   .badge svg{width:26px;height:26px;}
-  .badge-stat{font-family:var(--font-display);font-weight:400;font-size:var(--text-2xl);}
+  .badge-stat{font-family:var(--font-display);font-weight:400;font-size:var(--text-2xl);font-variant-numeric:tabular-nums;}
   .badge-label{
     font-size:var(--text-xs);
     line-height:1.4;
@@ -393,6 +521,96 @@
     .outcomes-grid{grid-template-columns:1fr;gap:var(--space-8);}
   }
 
+  /* ---------- PROCESS / HOW IT WORKS ---------- */
+  .process{
+    background:var(--white);
+    padding:var(--space-10) var(--space-5);
+  }
+  .process-inner{max-width:1280px;margin:0 auto;}
+  .process-head{text-align:center;margin-bottom:var(--space-9);}
+  .process-head .eyebrow{opacity:.55;display:block;margin-bottom:var(--space-5);}
+  .process-head .headline{font-size:var(--text-3xl);}
+  .process-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    border-top:1px solid rgba(20,20,20,.15);
+    border-left:1px solid rgba(20,20,20,.15);
+  }
+  .step{
+    border-right:1px solid rgba(20,20,20,.15);
+    border-bottom:1px solid rgba(20,20,20,.15);
+    padding:var(--space-7) var(--space-5);
+    text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:var(--space-4);
+  }
+  .step-icon{
+    width:40px;height:40px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .step-icon svg{width:100%;height:100%;}
+  @media (prefers-reduced-motion:no-preference){
+    .step-icon{animation:step-bob 3.4s ease-in-out infinite;}
+    .step:nth-child(2) .step-icon{animation-delay:.35s;}
+    .step:nth-child(3) .step-icon{animation-delay:.7s;}
+    .step:nth-child(4) .step-icon{animation-delay:1.05s;}
+  }
+  @keyframes step-bob{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-7px);}
+  }
+  .step-index{
+    font-family:var(--font-display);
+    font-style:italic;
+    font-weight:400;
+    font-variation-settings:"opsz" 20,"SOFT" 0,"WONK" 0;
+    opacity:.4;
+    font-size:var(--text-sm);
+  }
+  .step h3{
+    font-family:var(--font-display);
+    font-weight:300;
+    font-size:var(--text-lg);
+    text-transform:uppercase;
+  }
+  .step p{
+    font-size:var(--text-sm);
+    font-weight:300;
+    opacity:.75;
+    max-width:26ch;
+  }
+  @media (max-width:900px){
+    .process-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:520px){
+    .process-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- OFFER BAND ---------- */
+  .offer{
+    background:var(--beige);
+    color:var(--black);
+    padding:var(--space-8) var(--space-5);
+  }
+  .offer-inner{
+    max-width:920px;margin:0 auto;
+    text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:var(--space-4);
+  }
+  .offer .eyebrow{opacity:.6;}
+  .offer h2{
+    font-family:var(--font-display);
+    font-weight:400;
+    font-variation-settings:"opsz" 50,"SOFT" 0,"WONK" 0;
+    font-size:var(--text-2xl);
+    text-transform:uppercase;
+    line-height:1.15;
+  }
+  .offer p{
+    font-weight:300;
+    opacity:.8;
+    max-width:52ch;
+  }
+
   /* ---------- PROOF / TESTIMONIALS ---------- */
   .proof{
     background:var(--white);
@@ -438,6 +656,121 @@
   }
   @media (max-width:860px){
     .quote-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- GUARANTEE ---------- */
+  .guarantee{
+    background:var(--black);
+    color:var(--beige);
+    padding:var(--space-10) var(--space-5);
+    text-align:center;
+  }
+  .guarantee-inner{max-width:760px;margin:0 auto;}
+  .guarantee-icon{
+    width:44px;height:44px;
+    margin:0 auto var(--space-6);
+    color:var(--beige);
+  }
+  .guarantee .eyebrow{color:var(--beige);opacity:.65;display:block;margin-bottom:var(--space-5);}
+  .guarantee .headline{color:var(--beige);font-size:var(--text-3xl);margin-bottom:var(--space-6);}
+  .guarantee p.body-copy{
+    font-weight:300;
+    color:var(--beige);
+    opacity:.85;
+    max-width:56ch;
+    margin:0 auto;
+  }
+  .guarantee .fine-print{
+    margin-top:var(--space-6);
+    font-size:var(--text-xs);
+    opacity:.5;
+  }
+
+  /* ---------- PRICING ---------- */
+  .pricing{
+    background:var(--white);
+    padding:var(--space-10) var(--space-5);
+  }
+  .pricing-inner{max-width:1200px;margin:0 auto;}
+  .pricing-head{text-align:center;margin-bottom:var(--space-9);}
+  .pricing-head .eyebrow{opacity:.55;display:block;margin-bottom:var(--space-5);}
+  .pricing-head .headline{font-size:var(--text-3xl);}
+  .pricing-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:var(--space-6);
+    align-items:stretch;
+  }
+  .tier{
+    border:1px solid rgba(20,20,20,.18);
+    padding:var(--space-7) var(--space-6);
+    display:flex;flex-direction:column;
+    gap:var(--space-5);
+  }
+  .tier-featured{
+    background:var(--black);
+    color:var(--beige);
+    border-color:var(--black);
+    position:relative;
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .tier-featured{animation:tier-breathe 5s ease-in-out infinite;}
+    .tier-featured:hover{animation-play-state:paused;}
+  }
+  @keyframes tier-breathe{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.012);}
+  }
+  .tier-tag{
+    position:absolute;
+    top:calc(-1 * var(--space-4));
+    left:50%;transform:translateX(-50%);
+    background:var(--beige);
+    color:var(--black);
+    font-size:var(--text-xs);
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    padding:var(--space-2) var(--space-4);
+  }
+  .tier-name{
+    font-family:var(--font-display);
+    font-weight:400;
+    font-size:var(--text-xl);
+    text-transform:uppercase;
+  }
+  .tier-price{
+    font-family:var(--font-display);
+    font-weight:400;
+    font-variation-settings:"opsz" 40,"SOFT" 0,"WONK" 0;
+    font-size:var(--text-2xl);
+  }
+  .tier-desc{
+    font-size:var(--text-sm);
+    font-weight:300;
+    opacity:.75;
+  }
+  .tier-list{
+    display:flex;flex-direction:column;gap:var(--space-3);
+    flex:1;
+  }
+  .tier-list li{
+    display:flex;align-items:flex-start;gap:var(--space-3);
+    font-size:var(--text-sm);
+    font-weight:300;
+  }
+  .tier-check{
+    flex:none;width:16px;height:16px;margin-top:3px;
+    transition:opacity .4s var(--ease),transform .4s var(--ease);
+  }
+  .tier-list li:nth-child(1) .tier-check{transition-delay:.05s;}
+  .tier-list li:nth-child(2) .tier-check{transition-delay:.18s;}
+  .tier-list li:nth-child(3) .tier-check{transition-delay:.31s;}
+  .tier-list li:nth-child(4) .tier-check{transition-delay:.44s;}
+  .tier-list li:nth-child(5) .tier-check{transition-delay:.57s;}
+  .tier .btn{align-self:stretch;justify-content:center;margin-top:var(--space-2);}
+  @media (max-width:900px){
+    .pricing-grid{grid-template-columns:1fr;}
+    .tier-featured{animation:none !important;}
   }
 
   /* ---------- FAQ ---------- */
@@ -561,22 +894,107 @@
     opacity:.6;
   }
 
+  /* ---------- STICKY BOOK-NOW BAR ---------- */
+  .book-bar-input{position:absolute;opacity:0;pointer-events:none;}
+  .book-bar{
+    position:fixed;left:0;right:0;bottom:0;
+    z-index:90;
+    background:var(--black);
+    color:var(--beige);
+    border-top:1px solid rgba(251,251,251,.18);
+    padding:var(--space-3) var(--space-5);
+    display:flex;align-items:center;justify-content:center;
+    gap:var(--space-5);
+    flex-wrap:wrap;
+    text-align:center;
+    transition:transform .3s var(--ease),opacity .3s var(--ease);
+  }
+  .book-bar-input:checked ~ .book-bar{
+    transform:translateY(120%);
+    opacity:0;
+    pointer-events:none;
+  }
+  .book-bar-text{font-size:var(--text-sm);}
+  .book-bar-text strong{font-weight:500;}
+  .book-bar-close{
+    position:absolute;right:var(--space-4);top:50%;
+    transform:translateY(-50%);
+    width:20px;height:20px;
+    cursor:pointer;
+    opacity:.6;
+    transition:opacity .2s var(--ease);
+  }
+  .book-bar-close:hover{opacity:1;}
+  @media (max-width:600px){
+    .book-bar{padding-right:var(--space-9);}
+  }
+
+  /* ---------- SLIDE-IN NUDGE ---------- */
+  .nudge{
+    position:fixed;
+    right:var(--space-5);
+    bottom:calc(var(--bar-h) + var(--space-5));
+    z-index:95;
+    width:min(280px,calc(100vw - 2 * var(--space-5)));
+    background:var(--beige);
+    color:var(--black);
+    border:1px solid var(--black);
+    padding:var(--space-5);
+    display:none;
+    flex-direction:column;
+    gap:var(--space-3);
+  }
+  .nudge.visible{
+    display:flex;
+    opacity:1;
+    transform:translateX(0);
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .nudge.visible{animation:nudge-in .5s var(--ease) both;}
+  }
+  @keyframes nudge-in{
+    from{opacity:0;transform:translateX(24px);}
+    to{opacity:1;transform:translateX(0);}
+  }
+  .nudge-close{
+    position:absolute;top:var(--space-3);right:var(--space-3);
+    width:16px;height:16px;
+    cursor:pointer;
+    opacity:.6;
+    transition:opacity .2s var(--ease);
+  }
+  .nudge-close:hover{opacity:1;}
+  .nudge-title{
+    font-family:var(--font-display);
+    font-weight:400;
+    font-size:var(--text-md);
+  }
+  .nudge-body{
+    font-size:var(--text-sm);
+    opacity:.75;
+  }
+  .nudge .btn{align-self:flex-start;}
+
   /* ---------- REVEAL (progressive enhancement) ---------- */
-  .reveal-init{opacity:0;transform:translateY(24px);}
-  .reveal-init.revealed{
+  /* .js-armed is added by JS only, so content stays fully visible with JS off */
+  .reveal-init.js-armed{opacity:0;transform:translateY(24px);}
+  .reveal-init.js-armed.revealed{
     opacity:1;transform:translateY(0);
     transition:opacity .7s var(--ease),transform .7s var(--ease);
   }
+  .tier-list.js-armed .tier-check{opacity:0;transform:scale(.4);}
+  .tier-list.js-armed.revealed .tier-check{opacity:1;transform:scale(1);}
 
   @media (prefers-reduced-motion:reduce){
     html{scroll-behavior:auto;}
     *,*::before,*::after{transition:none !important;animation:none !important;}
-    .reveal-init{opacity:1;transform:none;}
+    .reveal-init.js-armed,.tier-list.js-armed .tier-check{opacity:1 !important;transform:none !important;}
   }
 </style>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
 <header class="nav" id="top">
   <div class="nav-inner">
@@ -587,7 +1005,9 @@
     <nav class="nav-links" aria-label="Primary">
       <a href="#trusted">Trusted</a>
       <a href="#outcomes">Outcomes</a>
+      <a href="#process">Process</a>
       <a href="#proof">Proof</a>
+      <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
     </nav>
 
@@ -607,14 +1027,35 @@
   <section class="hero" id="hero">
     <span class="hero-mark" aria-hidden="true">JWI</span>
     <div class="hero-inner">
-      <span class="eyebrow">Creative Marketing Agency</span>
-      <h1 class="headline">Strategy that moves
-        <span class="swash">markets<svg class="swash-svg" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true">
-          <path class="swash-path" d="M3 12 C 24 3, 40 19, 62 9 C 84 1, 100 17, 122 8 C 144 1, 160 16, 182 8 C 190 5, 195 9, 197 7" fill="none" stroke-width="3" stroke-linecap="round"/>
-        </svg></span>. Creative that moves people.</h1>
-      <div class="hero-actions">
-        <a class="btn btn-solid-beige" href="#quote">Get a Quote</a>
-        <a class="hero-secondary" href="#outcomes">See how we work</a>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Creative Marketing Agency</span>
+          <h1 class="headline">Strategy that moves
+            <span class="swash">markets<svg class="swash-svg" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true">
+              <path class="swash-path" d="M3 12 C 24 3, 40 19, 62 9 C 84 1, 100 17, 122 8 C 144 1, 160 16, 182 8 C 190 5, 195 9, 197 7" fill="none" stroke-width="3" stroke-linecap="round"/>
+            </svg></span>. Creative that moves people.</h1>
+          <div class="hero-actions">
+            <a class="btn btn-solid-beige" href="#quote">Get a Quote
+              <svg class="btn-sparkle" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/></svg>
+            </a>
+            <a class="hero-secondary" href="#outcomes">See how we work</a>
+          </div>
+        </div>
+        <div class="hero-media">
+          <div class="hero-media-frame" id="heroMediaFrame">
+            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"
+                 srcset="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&amp;fit=crop&amp;w=700&amp;q=75 700w, https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80 1200w"
+                 sizes="(max-width:900px) 100vw, 44vw"
+                 alt="JWI strategists reviewing a campaign plan together at the studio table"
+                 width="1200" height="1500" loading="eager" fetchpriority="high"
+                 onerror="this.style.display='none'">
+          </div>
+          <div class="hero-booking-card">
+            <span class="hero-booking-label">Free Strategy Call</span>
+            <span class="hero-booking-sub">30 minutes. No pitch deck.</span>
+            <a class="btn btn-solid-black" href="#quote">Book It</a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -622,16 +1063,16 @@
   <!-- BY THE NUMBERS -->
   <section class="numbers" id="numbers">
     <div class="numbers-inner reveal-init">
-      <div class="number-cell">
-        <span class="number-stat">900+</span>
+      <div class="number-cell lift">
+        <span class="number-stat count-target">900+</span>
         <span class="number-label">Projects delivered for clients</span>
       </div>
-      <div class="number-cell">
-        <span class="number-stat">4.9&#9733;</span>
+      <div class="number-cell lift">
+        <span class="number-stat count-target">4.9&#9733;</span>
         <span class="number-label">Average client rating</span>
       </div>
-      <div class="number-cell">
-        <span class="number-stat">7 Days</span>
+      <div class="number-cell lift">
+        <span class="number-stat count-target">7 Days</span>
         <span class="number-label">From signed brief to first deliverable</span>
       </div>
     </div>
@@ -642,24 +1083,24 @@
     <div class="trusted-inner reveal-init">
       <span class="eyebrow">Trusted by operators across the region</span>
       <div class="badge-grid">
-        <div class="badge">
+        <div class="badge lift">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
-          <span class="badge-stat">14</span>
+          <span class="badge-stat count-target">14</span>
           <span class="badge-label">Years building brands in this region</span>
         </div>
-        <div class="badge">
+        <div class="badge lift">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V10M11 19V5M18 19v-7M4 19h16"/></svg>
-          <span class="badge-stat">180+</span>
+          <span class="badge-stat count-target">180+</span>
           <span class="badge-label">Campaigns launched to date</span>
         </div>
-        <div class="badge">
+        <div class="badge lift">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.7-6.5-11a6.5 6.5 0 0 1 13 0c0 5.3-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.2"/></svg>
-          <span class="badge-stat">3</span>
+          <span class="badge-stat count-target">3</span>
           <span class="badge-label">Markets served under one strategy</span>
         </div>
-        <div class="badge">
+        <div class="badge lift">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="3"/><circle cx="17" cy="10" r="2.4"/><path d="M2.5 20c.6-3.3 3-5 5.5-5s4.9 1.7 5.5 5M14.8 15.3c1.9.2 3.7 1.7 4.2 4.7"/></svg>
-          <span class="badge-stat">100%</span>
+          <span class="badge-stat count-target">100%</span>
           <span class="badge-label">In-house strategists and creatives</span>
         </div>
       </div>
@@ -675,25 +1116,71 @@
         <h2 class="headline">This is what changes when JWI runs your marketing</h2>
       </div>
       <div class="outcomes-grid">
-        <div class="outcome-col reveal-init">
+        <div class="outcome-col reveal-init lift">
           <span class="index-mark">01</span>
           <span class="eyebrow">Revenue</span>
           <h3>Pipeline that does not dry up in the off season</h3>
           <p>We build acquisition systems that keep producing qualified leads year round, so growth stops depending on referrals and lucky timing.</p>
         </div>
-        <div class="outcome-col reveal-init">
+        <div class="outcome-col reveal-init lift">
           <span class="index-mark">02</span>
           <span class="eyebrow">Reputation</span>
           <h3>A brand people recognize before they remember why</h3>
           <p>Consistent positioning across every touchpoint means your name carries weight in the room before the pitch even starts.</p>
         </div>
-        <div class="outcome-col reveal-init">
+        <div class="outcome-col reveal-init lift">
           <span class="index-mark">03</span>
           <span class="eyebrow">Time</span>
           <h3>Your leadership back on the work only they can do</h3>
           <p>We run the marketing engine end to end, so your team stops moonlighting as marketers and gets back to running the business.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- PROCESS / HOW IT WORKS -->
+  <section class="process" id="process">
+    <div class="process-inner">
+      <div class="process-head reveal-init">
+        <span class="eyebrow eyebrow-rule">How we work</span>
+        <h2 class="headline">From first call to first result</h2>
+      </div>
+      <div class="process-grid">
+        <div class="step reveal-init">
+          <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6"/><line x1="21" y1="21" x2="14.5" y2="14.5"/></svg></span>
+          <span class="step-index">01</span>
+          <h3>Discover</h3>
+          <p>We map your market, your competitors, and where the current strategy is leaking money.</p>
+        </div>
+        <div class="step reveal-init">
+          <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg></span>
+          <span class="step-index">02</span>
+          <h3>Strategize</h3>
+          <p>We build a plan tied to one number that matters, not a checklist of tactics.</p>
+        </div>
+        <div class="step reveal-init">
+          <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4z"/><path d="M14 5l3 3"/></svg></span>
+          <span class="step-index">03</span>
+          <h3>Create</h3>
+          <p>Our in-house team writes, designs, and produces the campaign end to end.</p>
+        </div>
+        <div class="step reveal-init">
+          <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"/><path d="M15 7h5v5"/></svg></span>
+          <span class="step-index">04</span>
+          <h3>Measure</h3>
+          <p>We report against the number we agreed on, every single month.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OFFER BAND -->
+  <section class="offer" id="offer">
+    <div class="offer-inner reveal-init">
+      <span class="eyebrow">Limited-time offer</span>
+      <h2>Get a Free Consultation Session</h2>
+      <p>Book a thirty minute strategy call. No cost, no obligation, just a clear read on what is working and what is not.</p>
+      <a class="btn btn-solid-black" href="#quote">Claim My Free Session</a>
     </div>
   </section>
 
@@ -705,20 +1192,81 @@
         <h2 class="headline">Proof, not promises</h2>
       </div>
       <div class="quote-grid">
-        <div class="quote-cell reveal-init">
+        <div class="quote-cell reveal-init lift">
           <span class="index-mark">01</span>
           <blockquote><span class="paren">(</span>They did not just make us look better. They made the phone ring.<span class="paren">)</span></blockquote>
           <cite class="quote-cite">R. Delgado, Managing Partner<br>Coastline Hospitality Group</cite>
         </div>
-        <div class="quote-cell reveal-init">
+        <div class="quote-cell reveal-init lift">
           <span class="index-mark">02</span>
           <blockquote><span class="paren">(</span>Every dollar we spent, we could trace to a result. That never happened before JWI.<span class="paren">)</span></blockquote>
           <cite class="quote-cite">N. Okafor, CFO<br>Meridian Capital</cite>
         </div>
-        <div class="quote-cell reveal-init">
+        <div class="quote-cell reveal-init lift">
           <span class="index-mark">03</span>
           <blockquote><span class="paren">(</span>We stopped guessing. Every campaign now ties back to a number on the P&amp;L.<span class="paren">)</span></blockquote>
           <cite class="quote-cite">S. Patel, VP Marketing<br>Vantage Retail Partners</cite>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GUARANTEE -->
+  <section class="guarantee" id="guarantee">
+    <div class="guarantee-inner reveal-init">
+      <svg class="guarantee-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4.5"/></svg>
+      <span class="eyebrow">Risk reversal</span>
+      <h2 class="headline">You do not carry the risk, we do</h2>
+      <p class="body-copy">If the first ninety days do not produce a documented lift in qualified pipeline, we work the next thirty days at no additional cost until they do. That is how confident we are in the process.</p>
+      <p class="fine-print">One guarantee per new client relationship. Ask your strategist for full terms.</p>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <div class="pricing-inner">
+      <div class="pricing-head reveal-init">
+        <span class="eyebrow eyebrow-rule">Ways to work with us</span>
+        <h2 class="headline">Choose the level of partnership that fits</h2>
+      </div>
+      <div class="pricing-grid">
+        <div class="tier reveal-init lift">
+          <span class="tier-name">Foundations</span>
+          <span class="tier-price">From $5,000</span>
+          <p class="tier-desc">A one-time strategy sprint for teams who need clarity before they need a campaign.</p>
+          <ul class="tier-list reveal-init">
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Brand and market audit</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Positioning workshop</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Ninety day roadmap</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>One core campaign concept</li>
+          </ul>
+          <a class="btn btn-outline-black" href="#quote">Get a Quote</a>
+        </div>
+        <div class="tier tier-featured reveal-init lift">
+          <span class="tier-tag">Most popular</span>
+          <span class="tier-name">Growth Partner</span>
+          <span class="tier-price">From $9,500/mo</span>
+          <p class="tier-desc">An always-on retainer for operators who need a marketing engine, not a project.</p>
+          <ul class="tier-list reveal-init">
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Everything in Foundations</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Always-on campaign management</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Dedicated strategist and creative team</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Monthly reporting tied to revenue</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Priority turnaround</li>
+          </ul>
+          <a class="btn btn-solid-beige" href="#quote">Get a Quote</a>
+        </div>
+        <div class="tier reveal-init lift">
+          <span class="tier-name">Full-Service</span>
+          <span class="tier-price">Custom</span>
+          <p class="tier-desc">For multi-market operators who need JWI embedded as their marketing department.</p>
+          <ul class="tier-list reveal-init">
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Everything in Growth Partner</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Multi-market coordination</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Executive strategy sessions</li>
+            <li><svg class="tier-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Quarterly business reviews</li>
+          </ul>
+          <a class="btn btn-outline-black" href="#quote">Get a Quote</a>
         </div>
       </div>
     </div>
@@ -761,6 +1309,24 @@
             <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
           </summary>
           <p>Every engagement starts by agreeing on the business number we are moving, whether that is qualified leads, revenue per campaign, or repeat purchase rate. We report against that number, not against vanity metrics.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What happens if this does not work for us?
+            <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
+          </summary>
+          <p>That is what our guarantee is for. If the first ninety days do not produce a documented lift in qualified pipeline, we work the next thirty days at no additional cost until they do.</p>
+        </details>
+        <details class="faq-item">
+          <summary>We have been burned by agencies before, how is this different?
+            <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
+          </summary>
+          <p>Most agency relationships fail because nobody agreed on a number up front. We fix that on day one, staff your account with our own in-house team instead of subcontractors, and put the guarantee above in writing.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is this affordable for a business our size?
+            <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
+          </summary>
+          <p>The Foundations package exists for exactly this reason, a fixed one-time cost with no retainer required. Most clients start there and move into a retainer once they see the roadmap in action.</p>
         </details>
       </div>
     </div>
@@ -835,18 +1401,38 @@
   </div>
 </footer>
 
+<input type="checkbox" id="book-bar-toggle" class="book-bar-input" aria-hidden="true">
+<div class="book-bar">
+  <label for="book-bar-toggle" class="book-bar-close" aria-label="Dismiss">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+  </label>
+  <span class="book-bar-text"><strong>Only 3 slots left this week</strong> for a free consultation.</span>
+  <a class="btn btn-solid-beige" href="#quote">Book Now</a>
+</div>
+
+<div class="nudge" id="nudge">
+  <button class="nudge-close" id="nudgeClose" type="button" aria-label="Dismiss">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+  </button>
+  <span class="nudge-title">Still deciding?</span>
+  <span class="nudge-body">Get a free consultation. No pressure, no pitch, just a clear next step.</span>
+  <a class="btn btn-solid-black" href="#quote">Free Consultation</a>
+</div>
+
 <script>
   (function(){
     // Mobile nav: close panel after a link is clicked (progressive enhancement only)
-    var toggle = document.getElementById('nav-toggle');
+    var navToggle = document.getElementById('nav-toggle');
     document.querySelectorAll('.nav-links a').forEach(function(link){
-      link.addEventListener('click', function(){ toggle.checked = false; });
+      link.addEventListener('click', function(){ navToggle.checked = false; });
     });
 
-    // Fade-up reveal on scroll: content is fully visible by default,
-    // JS only adds the hidden starting state if it can also observe the reveal.
+    // Fade-up reveal on scroll: elements only get the hidden starting state
+    // (.js-armed) once JS has also set up the observer to reveal them again,
+    // so content stays fully visible with JavaScript off.
     if('IntersectionObserver' in window){
       var targets = document.querySelectorAll('.reveal-init');
+      targets.forEach(function(t){ t.classList.add('js-armed'); });
       var io = new IntersectionObserver(function(entries){
         entries.forEach(function(entry){
           if(entry.isIntersecting){
@@ -856,7 +1442,115 @@
         });
       }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
       targets.forEach(function(t){ io.observe(t); });
+
+      // Count-up on stat numbers, once, when they scroll into view
+      var countTargets = document.querySelectorAll('.count-target');
+      var countIo = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            animateCount(entry.target);
+            countIo.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.6 });
+      countTargets.forEach(function(t){ countIo.observe(t); });
+
+      function animateCount(el){
+        var finalText = el.textContent;
+        var match = finalText.match(/[0-9]*\.?[0-9]+/);
+        if(!match){ return; }
+        var target = parseFloat(match[0]);
+        var decimals = (match[0].split('.')[1] || '').length;
+        var prefix = finalText.slice(0, match.index);
+        var suffix = finalText.slice(match.index + match[0].length);
+        var duration = 1200;
+        var startTime = null;
+        function step(ts){
+          if(startTime === null){ startTime = ts; }
+          var progress = Math.min((ts - startTime) / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          var current = (target * eased).toFixed(decimals);
+          el.textContent = prefix + current + suffix;
+          if(progress < 1){
+            requestAnimationFrame(step);
+          } else {
+            el.textContent = finalText;
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      // Slide-in nudge: fires once, after the visitor has scrolled past pricing
+      var nudge = document.getElementById('nudge');
+      var nudgeClose = document.getElementById('nudgeClose');
+      var pricingSection = document.getElementById('pricing');
+      var nudgeStorageKey = 'jwiNudgeShown';
+      var nudgeShown = false;
+      try { nudgeShown = localStorage.getItem(nudgeStorageKey) === '1'; } catch(e){}
+
+      function showNudge(){
+        if(nudgeShown || !nudge) return;
+        nudgeShown = true;
+        nudge.classList.add('visible');
+        try { localStorage.setItem(nudgeStorageKey, '1'); } catch(e){}
+      }
+      function hideNudge(){
+        if(!nudge) return;
+        nudge.classList.remove('visible');
+      }
+      if(nudgeClose){ nudgeClose.addEventListener('click', hideNudge); }
+
+      if(pricingSection && !nudgeShown){
+        var seenPricing = false;
+        var pricingIo = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if(entry.isIntersecting){
+              seenPricing = true;
+            } else if(seenPricing && entry.boundingClientRect.bottom < 0){
+              showNudge();
+              pricingIo.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0 });
+        pricingIo.observe(pricingSection);
+      }
     }
+
+    // Scroll-progress bar + hero image parallax, batched into one
+    // rAF-throttled scroll handler for smoothness on low-end hardware.
+    var progressEl = document.getElementById('scrollProgress');
+    var heroImg = document.querySelector('.hero-media-frame img');
+    var heroSection = document.getElementById('hero');
+    var ticking = false;
+
+    function updateOnScroll(){
+      var scrollTop = window.scrollY || document.documentElement.scrollTop;
+      var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      var progress = docHeight > 0 ? Math.min(Math.max(scrollTop / docHeight, 0), 1) : 0;
+      if(progressEl){
+        progressEl.style.transform = 'scaleX(' + progress.toFixed(4) + ')';
+      }
+      if(heroImg && heroSection){
+        var rect = heroSection.getBoundingClientRect();
+        var vh = window.innerHeight;
+        if(rect.bottom > 0 && rect.top < vh){
+          var raw = (vh - rect.top) / (vh + rect.height);
+          var clamped = Math.min(Math.max(raw, 0), 1);
+          var offset = (clamped - 0.5) * 36;
+          heroImg.style.transform = 'translateY(' + offset.toFixed(1) + 'px)';
+        }
+      }
+      ticking = false;
+    }
+    function onScroll(){
+      if(!ticking){
+        requestAnimationFrame(updateOnScroll);
+        ticking = true;
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    updateOnScroll();
   })();
 </script>
 </body>
