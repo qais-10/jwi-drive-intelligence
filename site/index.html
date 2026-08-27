@@ -7,14 +7,14 @@
 <meta name="description" content="JWI is a creative marketing agency for operators who answer to a board, a franchisee network, or a founder's name on the door. Strategy, brand, and campaigns built for measurable outcomes.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Hanken+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --black:#141414;
     --white:#FBFBFB;
     --beige:#EFEEEA;
-    --font-display:"Newsreader",Georgia,"Times New Roman",serif;
-    --font-body:"Work Sans",-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --font-display:"Fraunces",Georgia,"Times New Roman",serif;
+    --font-body:"Hanken Grotesk",-apple-system,"Helvetica Neue",Arial,sans-serif;
 
     --space-1:.25rem;
     --space-2:.5rem;
@@ -36,7 +36,7 @@
     --text-xl:clamp(1.75rem,1.4rem + 1.2vw,2.5rem);
     --text-2xl:clamp(2.25rem,1.7rem + 2vw,3.25rem);
     --text-3xl:clamp(2.75rem,2rem + 3vw,4.25rem);
-    --text-hero:clamp(2.75rem,1.9rem + 4.5vw,6.25rem);
+    --text-hero:clamp(3.25rem,2.1rem + 5.8vw,7.5rem);
 
     --nav-h:76px;
     --ease:cubic-bezier(.22,.61,.36,1);
@@ -77,16 +77,42 @@
     text-transform:uppercase;
   }
 
+  .eyebrow-rule{
+    display:inline-block;
+    margin-bottom:var(--space-4);
+  }
+  .eyebrow-rule::after{
+    content:"";
+    display:block;
+    width:32px;
+    height:1px;
+    margin:var(--space-3) auto 0;
+    background:currentColor;
+    opacity:.4;
+  }
+
   .headline{
     font-family:var(--font-display);
     font-weight:300;
+    font-variation-settings:"opsz" 80,"SOFT" 0,"WONK" 0;
     text-transform:uppercase;
     text-align:center;
-    letter-spacing:.01em;
-    line-height:1.12;
+    letter-spacing:-.01em;
+    line-height:1.1;
     max-width:20ch;
     margin-left:auto;
     margin-right:auto;
+  }
+
+  .index-mark{
+    display:block;
+    font-family:var(--font-display);
+    font-style:italic;
+    font-weight:400;
+    font-variation-settings:"opsz" 20,"SOFT" 0,"WONK" 0;
+    font-size:var(--text-md);
+    opacity:.4;
+    margin-bottom:var(--space-4);
   }
 
   .btn{
@@ -182,17 +208,56 @@
 
   /* ---------- HERO ---------- */
   .hero{
+    position:relative;
     background:var(--black);
     color:var(--beige);
     padding:var(--space-11) var(--space-5) var(--space-10);
     text-align:center;
+    overflow:hidden;
   }
-  .hero-inner{max-width:900px;margin:0 auto;}
+  .hero-mark{
+    position:absolute;
+    top:50%;left:50%;
+    transform:translate(-50%,-56%);
+    font-family:var(--font-display);
+    font-style:italic;
+    font-weight:400;
+    font-variation-settings:"opsz" 144,"SOFT" 0,"WONK" 0;
+    font-size:min(60vw,760px);
+    line-height:1;
+    color:var(--beige);
+    opacity:.045;
+    pointer-events:none;
+    user-select:none;
+    white-space:nowrap;
+  }
+  .hero-inner{position:relative;max-width:900px;margin:0 auto;}
   .hero .eyebrow{color:var(--beige);opacity:.75;display:block;margin-bottom:var(--space-6);}
   .hero .headline{
     font-size:var(--text-hero);
+    font-weight:400;
+    letter-spacing:-.02em;
+    line-height:1.04;
     color:var(--beige);
     max-width:16ch;
+  }
+  .swash{position:relative;display:inline-block;white-space:nowrap;}
+  .swash-svg{
+    position:absolute;
+    left:-2%;right:-2%;bottom:-.1em;
+    width:104%;height:.32em;
+    overflow:visible;
+    pointer-events:none;
+    transform:scaleX(1);
+    transform-origin:left center;
+  }
+  .swash-path{stroke:var(--beige);}
+  @media (prefers-reduced-motion:no-preference){
+    .swash-svg{animation:swash-draw .9s var(--ease) .5s both;}
+  }
+  @keyframes swash-draw{
+    from{transform:scaleX(0);}
+    to{transform:scaleX(1);}
   }
   .hero-actions{
     margin-top:var(--space-8);
@@ -209,6 +274,44 @@
     transition:border-color .2s var(--ease),opacity .2s var(--ease);
   }
   .hero-secondary:hover{border-color:var(--beige);}
+
+  /* ---------- BY THE NUMBERS ---------- */
+  .numbers{
+    background:var(--white);
+    color:var(--black);
+    padding:var(--space-8) var(--space-5);
+  }
+  .numbers-inner{
+    max-width:1000px;margin:0 auto;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    border-top:1px solid rgba(20,20,20,.15);
+    border-left:1px solid rgba(20,20,20,.15);
+  }
+  .number-cell{
+    border-right:1px solid rgba(20,20,20,.15);
+    border-bottom:1px solid rgba(20,20,20,.15);
+    padding:var(--space-7) var(--space-4);
+    text-align:center;
+  }
+  .number-stat{
+    display:block;
+    font-family:var(--font-display);
+    font-weight:400;
+    font-variation-settings:"opsz" 60,"SOFT" 0,"WONK" 0;
+    font-size:var(--text-2xl);
+    line-height:1;
+    margin-bottom:var(--space-3);
+  }
+  .number-label{
+    font-size:var(--text-xs);
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+  @media (max-width:640px){
+    .numbers-inner{grid-template-columns:1fr;}
+  }
 
   /* ---------- TRUSTED ---------- */
   .trusted{
@@ -310,18 +413,21 @@
     border-bottom:1px solid rgba(20,20,20,.15);
     padding:var(--space-8) var(--space-6);
     display:flex;flex-direction:column;
-    justify-content:space-between;
-    gap:var(--space-7);
+    gap:var(--space-5);
   }
+  .quote-cell .index-mark{margin-bottom:0;}
   .quote-cell blockquote{
-    margin:0;
+    margin:var(--space-3) 0 var(--space-4);
     font-family:var(--font-display);
-    font-weight:300;
+    font-style:italic;
+    font-weight:400;
+    font-variation-settings:"opsz" 30,"SOFT" 0,"WONK" 0;
     font-size:var(--text-lg);
     line-height:1.38;
     text-align:center;
+    flex:1;
   }
-  .quote-cell blockquote .paren{opacity:.4;}
+  .quote-cell blockquote .paren{opacity:.4;font-style:normal;}
   .quote-cite{
     font-size:var(--text-xs);
     letter-spacing:.08em;
@@ -499,12 +605,34 @@
 
   <!-- HERO -->
   <section class="hero" id="hero">
+    <span class="hero-mark" aria-hidden="true">JWI</span>
     <div class="hero-inner">
       <span class="eyebrow">Creative Marketing Agency</span>
-      <h1 class="headline">Strategy that moves markets. Creative that moves people.</h1>
+      <h1 class="headline">Strategy that moves
+        <span class="swash">markets<svg class="swash-svg" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true">
+          <path class="swash-path" d="M3 12 C 24 3, 40 19, 62 9 C 84 1, 100 17, 122 8 C 144 1, 160 16, 182 8 C 190 5, 195 9, 197 7" fill="none" stroke-width="3" stroke-linecap="round"/>
+        </svg></span>. Creative that moves people.</h1>
       <div class="hero-actions">
         <a class="btn btn-solid-beige" href="#quote">Get a Quote</a>
         <a class="hero-secondary" href="#outcomes">See how we work</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- BY THE NUMBERS -->
+  <section class="numbers" id="numbers">
+    <div class="numbers-inner reveal-init">
+      <div class="number-cell">
+        <span class="number-stat">900+</span>
+        <span class="number-label">Projects delivered for clients</span>
+      </div>
+      <div class="number-cell">
+        <span class="number-stat">4.9&#9733;</span>
+        <span class="number-label">Average client rating</span>
+      </div>
+      <div class="number-cell">
+        <span class="number-stat">7 Days</span>
+        <span class="number-label">From signed brief to first deliverable</span>
       </div>
     </div>
   </section>
@@ -543,21 +671,24 @@
   <section class="outcomes" id="outcomes">
     <div class="outcomes-inner">
       <div class="outcomes-head reveal-init">
-        <span class="eyebrow">The outcomes we create</span>
+        <span class="eyebrow eyebrow-rule">The outcomes we create</span>
         <h2 class="headline">This is what changes when JWI runs your marketing</h2>
       </div>
       <div class="outcomes-grid">
         <div class="outcome-col reveal-init">
+          <span class="index-mark">01</span>
           <span class="eyebrow">Revenue</span>
           <h3>Pipeline that does not dry up in the off season</h3>
           <p>We build acquisition systems that keep producing qualified leads year round, so growth stops depending on referrals and lucky timing.</p>
         </div>
         <div class="outcome-col reveal-init">
+          <span class="index-mark">02</span>
           <span class="eyebrow">Reputation</span>
           <h3>A brand people recognize before they remember why</h3>
           <p>Consistent positioning across every touchpoint means your name carries weight in the room before the pitch even starts.</p>
         </div>
         <div class="outcome-col reveal-init">
+          <span class="index-mark">03</span>
           <span class="eyebrow">Time</span>
           <h3>Your leadership back on the work only they can do</h3>
           <p>We run the marketing engine end to end, so your team stops moonlighting as marketers and gets back to running the business.</p>
@@ -570,19 +701,22 @@
   <section class="proof" id="proof">
     <div class="proof-inner">
       <div class="proof-head reveal-init">
-        <span class="eyebrow">What clients say</span>
+        <span class="eyebrow eyebrow-rule">What clients say</span>
         <h2 class="headline">Proof, not promises</h2>
       </div>
       <div class="quote-grid">
         <div class="quote-cell reveal-init">
+          <span class="index-mark">01</span>
           <blockquote><span class="paren">(</span>They did not just make us look better. They made the phone ring.<span class="paren">)</span></blockquote>
           <cite class="quote-cite">R. Delgado, Managing Partner<br>Coastline Hospitality Group</cite>
         </div>
         <div class="quote-cell reveal-init">
+          <span class="index-mark">02</span>
           <blockquote><span class="paren">(</span>Every dollar we spent, we could trace to a result. That never happened before JWI.<span class="paren">)</span></blockquote>
           <cite class="quote-cite">N. Okafor, CFO<br>Meridian Capital</cite>
         </div>
         <div class="quote-cell reveal-init">
+          <span class="index-mark">03</span>
           <blockquote><span class="paren">(</span>We stopped guessing. Every campaign now ties back to a number on the P&amp;L.<span class="paren">)</span></blockquote>
           <cite class="quote-cite">S. Patel, VP Marketing<br>Vantage Retail Partners</cite>
         </div>
@@ -594,7 +728,7 @@
   <section class="faq" id="faq">
     <div class="faq-inner">
       <div class="faq-head reveal-init">
-        <span class="eyebrow">Questions</span>
+        <span class="eyebrow eyebrow-rule">Questions</span>
         <h2 class="headline">Before you reach out</h2>
       </div>
       <div class="faq-list reveal-init">
@@ -636,7 +770,7 @@
   <section class="quote-section" id="quote">
     <div class="quote-inner">
       <div class="quote-head reveal-init">
-        <span class="eyebrow">Get a quote</span>
+        <span class="eyebrow eyebrow-rule">Get a quote</span>
         <h2 class="headline">Tell us where the business is headed</h2>
         <p>Share a few details and a strategist will follow up within one business day with next steps, not a sales script.</p>
       </div>
