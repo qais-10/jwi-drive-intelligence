@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JWI Market Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Tokens ---------- */
+  :root{
+    --ink:      #10151b;
+    --ink-2:    #1b232b;
+    --ink-line: #313c46;
+    --paper:    #eef1ef;
+    --paper-2:  #e2e8e3;
+    --paper-3:  #d8e0da;
+    --brass:    #b8863f;
+    --brass-lt: #d3a862;
+    --teal:     #2f6a63;
+    --teal-dk:  #204942;
+
+    --text:        #171b20;
+    --text-muted:  #5b6460;
+    --text-faint:  #838c86;
+    --on-ink:      #eef1ef;
+    --on-ink-muted:#9aa39d;
+
+    --display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --body:    'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono:    'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+
+    --fs-eyebrow: 0.72rem;
+    --fs-small:   0.9rem;
+    --fs-body:    1.0625rem;
+    --fs-lead:    1.2rem;
+    --fs-h3:      clamp(1.3rem, 1.15rem + 0.6vw, 1.6rem);
+    --fs-h2:      clamp(1.85rem, 1.5rem + 1.6vw, 2.7rem);
+    --fs-hero:    clamp(2.5rem, 1.75rem + 3.4vw, 4.6rem);
+    --fs-quote:   clamp(1.4rem, 1.15rem + 1.2vw, 2rem);
+
+    --space-1: 0.5rem;
+    --space-2: 0.9rem;
+    --space-3: 1.5rem;
+    --space-4: 2.25rem;
+    --space-5: 3.5rem;
+    --space-6: 5.5rem;
+    --space-7: 8rem;
+
+    --max: 1120px;
+    --max-narrow: 720px;
+
+    --ease: cubic-bezier(.22,.61,.36,1);
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--paper);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: var(--fs-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  img{ max-width:100%; display:block; }
+  h1,h2,h3{ font-family: var(--display); margin: 0; text-wrap: balance; color: var(--text); }
+  p{ margin:0; }
+  a{ color: inherit; }
+  ::selection{ background: var(--brass); color: var(--ink); }
+
+  .wrap{ max-width: var(--max); margin: 0 auto; padding-inline: 1.25rem; }
+  @media (min-width: 640px){ .wrap{ padding-inline: 2rem; } }
+
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: var(--fs-eyebrow);
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    display: inline-flex;
+    align-items: center;
+    gap: .5em;
+  }
+
+  /* ---------- Motion: safe-by-default reveals ---------- */
+  .reveal{ opacity: 1; transform: none; }
+  html.js-ready .reveal{
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity .7s var(--ease), transform .7s var(--ease);
+  }
+  html.js-ready .reveal.in-view{ opacity: 1; transform: none; }
+  .reveal-1{ transition-delay: .05s; }
+  .reveal-2{ transition-delay: .15s; }
+  .reveal-3{ transition-delay: .25s; }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    html.js-ready .reveal{ transition: none; opacity: 1; transform: none; }
+    *{ animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: .95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .8rem 1.35rem;
+    border-radius: 3px;
+    text-decoration: none;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease), background .25s var(--ease);
+    position: relative;
+  }
+  .btn-primary{
+    background: var(--brass);
+    color: var(--ink);
+    box-shadow: 0 1px 0 rgba(16,21,27,.15);
+  }
+  .btn-primary:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px -8px rgba(184,134,63,.55);
+    background: var(--brass-lt);
+  }
+  .btn-primary:active{ transform: translateY(0); }
+  .btn-primary:focus-visible{ outline: 2px solid var(--ink); outline-offset: 3px; }
+  .btn-primary .spark{
+    position:absolute; width: 14px; height:14px; top:-6px; right:-4px;
+    opacity: 0; transform: scale(.4) rotate(0deg);
+    transition: opacity .5s var(--ease), transform .6s var(--ease);
+    pointer-events:none;
+  }
+  .btn-primary:hover .spark{ opacity: 1; transform: scale(1) rotate(25deg); }
+
+  .btn-nav{
+    padding: .55rem .95rem;
+    font-size: .82rem;
+  }
+
+  /* ---------- Nav ---------- */
+  .nav{
+    position: sticky; top:0; z-index: 50;
+    background: rgba(238,241,239,.92);
+    border-bottom: 1px solid var(--paper-3);
+  }
+  .nav-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 1rem; padding-block: .7rem;
+  }
+  .brand{ display:flex; align-items:center; gap:.6rem; text-decoration:none; }
+  .brand-mark{ width: 30px; height:30px; flex:none; }
+  .brand-word{
+    font-family: var(--display); font-weight:700; font-size:1.05rem; letter-spacing:.01em;
+    color: var(--text);
+  }
+  .brand-word small{
+    display:block; font-family: var(--mono); font-weight:400; font-size:.58rem;
+    letter-spacing:.14em; text-transform:uppercase; color: var(--text-muted); margin-top:.1em;
+  }
+  .nav-links{
+    display:none; align-items:center; gap: 1.7rem;
+    font-size: .88rem; font-weight:600;
+  }
+  .nav-links a{ text-decoration:none; color: var(--text-muted); position:relative; padding: .25rem 0; }
+  .nav-links a:hover{ color: var(--text); }
+  .nav-links a::after{
+    content:""; position:absolute; left:0; right:100%; bottom:-2px; height:2px;
+    background: var(--brass); transition: right .3s var(--ease);
+  }
+  .nav-links a:hover::after{ right:0; }
+  @media (min-width: 780px){ .nav-links{ display:flex; } }
+
+  /* ---------- Hero (mesh) ---------- */
+  .mesh{
+    position:relative;
+    background-color: var(--ink);
+    background-image:
+      radial-gradient(60% 55% at 14% 8%,  rgba(184,134,63,.38), transparent 60%),
+      radial-gradient(65% 60% at 88% 0%,  rgba(47,106,99,.55), transparent 62%),
+      radial-gradient(80% 70% at 50% 105%, rgba(32,73,66,.65), transparent 65%),
+      linear-gradient(165deg, #141b23 0%, #10151b 55%, #0c1015 100%);
+    color: var(--on-ink);
+  }
+  .mesh::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(238,241,239,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(238,241,239,.05) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: linear-gradient(180deg, rgba(0,0,0,.9), rgba(0,0,0,0) 78%);
+    pointer-events:none;
+  }
+  .hero{
+    position:relative;
+    padding-top: clamp(3rem, 2rem + 4vw, 5.5rem);
+    padding-bottom: clamp(3.5rem, 2.5rem + 4vw, 6rem);
+  }
+  .hero-tag{
+    border:1px solid rgba(238,241,239,.28);
+    color: var(--on-ink-muted);
+    padding: .4rem .75rem;
+    border-radius: 2px;
+    margin-bottom: var(--space-4);
+  }
+  .hero-tag b{ color: var(--brass-lt); font-weight:500; }
+  .hero h1{
+    font-size: var(--fs-hero);
+    font-weight: 600;
+    line-height: 1.06;
+    letter-spacing: -.01em;
+    max-width: 15ch;
+    color: var(--on-ink);
+  }
+  .underline-word{ position:relative; white-space:nowrap; }
+  .underline-word svg{
+    position:absolute; left:-2%; right:-2%; bottom:-.1em; width:104%; height:.3em;
+    overflow: visible;
+  }
+  .underline-word path{
+    fill:none; stroke: var(--brass); stroke-width: 6; stroke-linecap: round;
+    stroke-dasharray: 1; stroke-dashoffset: 0;
+  }
+  html.js-ready .underline-word path{
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1s var(--ease) .5s;
+  }
+  html.js-ready .in-view .underline-word path{ stroke-dashoffset: 0; }
+
+  .hero-foot{
+    margin-top: var(--space-5);
+    display:flex; flex-wrap:wrap; align-items:center; gap: var(--space-4);
+  }
+  .coords{
+    font-family: var(--mono); font-size: .82rem; color: var(--on-ink-muted);
+    display:flex; align-items:center; gap:.6rem;
+  }
+  .coords svg{ flex:none; opacity:.8; }
+  .coords .num{ color: var(--on-ink); font-variant-numeric: tabular-nums; }
+
+  /* ---------- Section rhythm ---------- */
+  section{ padding-block: clamp(3.5rem, 2.5rem + 3.6vw, 6.5rem); }
+  .section-head{ max-width: 40rem; margin-bottom: var(--space-5); }
+  .section-head h2{ font-size: var(--fs-h2); font-weight:600; line-height:1.12; }
+  .section-head .eyebrow{ color: var(--teal-dk); margin-bottom: var(--space-2); }
+
+  /* ---------- Promise ---------- */
+  .promise{ background: var(--paper); }
+  .promise-body{ max-width: 34rem; }
+  .promise p{
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: var(--fs-quote);
+    line-height: 1.42;
+    color: var(--text);
+  }
+  .promise p + p{ margin-top: var(--space-3); }
+  .promise-rule{
+    width: 3rem; height: 3px; background: var(--brass); margin-bottom: var(--space-4); border:none;
+  }
+
+  /* ---------- Benefits ---------- */
+  .benefits{ background: var(--paper-2); }
+  .benefit-list{ display:flex; flex-direction:column; }
+  .benefit{
+    display:grid; grid-template-columns: 2.75rem 1fr; gap: 1.1rem;
+    padding-block: var(--space-4);
+    border-top: 1px solid var(--paper-3);
+    transition: transform .35s var(--ease);
+  }
+  .benefit:last-child{ border-bottom: 1px solid var(--paper-3); }
+  .benefit:hover{ transform: translateX(4px); }
+  .check{
+    width: 2.75rem; height: 2.75rem; border-radius: 50%;
+    background: var(--paper); border: 1px solid var(--paper-3);
+    display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .check svg{ width: 22px; height:22px; }
+  .check path{
+    fill:none; stroke: var(--teal); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 1; stroke-dashoffset: 0;
+  }
+  html.js-ready .check path{ stroke-dashoffset: 1; transition: stroke-dashoffset .7s var(--ease) .15s; }
+  html.js-ready .in-view .check path{ stroke-dashoffset: 0; }
+  .benefit h3{ font-size: var(--fs-h3); font-weight: 600; margin-bottom: .4rem; }
+  .benefit p{ color: var(--text-muted); max-width: 46ch; }
+
+  /* ---------- Testimonial ---------- */
+  .testimonial{ background: var(--paper); }
+  .quote-panel{
+    background: var(--paper-2);
+    border: 1px solid var(--paper-3);
+    border-radius: 4px;
+    padding: var(--space-5) var(--space-4);
+    max-width: 44rem;
+    position: relative;
+  }
+  .quote-mark{
+    font-family: var(--display); font-weight:900; font-style:italic;
+    font-size: 4.5rem; line-height:1; color: var(--brass);
+    display:block; margin-bottom: .25rem;
+  }
+  .quote-panel blockquote{
+    margin:0; font-family: var(--display); font-weight:500; font-size: var(--fs-quote);
+    line-height: 1.4; color: var(--text);
+  }
+  .quote-attrib{
+    margin-top: var(--space-4);
+    display:flex; align-items:center; gap: .8rem;
+    font-family: var(--mono); font-size: var(--fs-small); color: var(--text-muted);
+  }
+  .quote-attrib .dot{ width:6px; height:6px; border-radius:50%; background: var(--teal); flex:none; }
+  .quote-flag{
+    margin-top: var(--space-3);
+    font-family: var(--mono); font-size: .78rem; color: var(--text-faint);
+    border-left: 2px solid var(--paper-3); padding-left: .7rem;
+  }
+
+  /* ---------- Objection banner ---------- */
+  .objection{
+    background: var(--ink);
+    color: var(--on-ink);
+    padding-block: clamp(3.5rem, 2.5rem + 4vw, 6rem);
+  }
+  .objection .wrap{ max-width: 46rem; }
+  .objection p{
+    font-family: var(--display); font-style: italic; font-weight: 500;
+    font-size: clamp(1.6rem, 1.2rem + 2vw, 2.6rem);
+    line-height: 1.28;
+  }
+  .objection .underline-word path{ stroke: var(--brass); }
+  .objection .eyebrow{ color: var(--on-ink-muted); margin-bottom: var(--space-3); }
+
+  /* ---------- FAQ ---------- */
+  .faq{ background: var(--paper); }
+  .faq-list{ max-width: 42rem; }
+  .faq-item{
+    border-top: 1px solid var(--paper-3);
+  }
+  .faq-list .faq-item:last-child{ border-bottom: 1px solid var(--paper-3); }
+  .faq-item summary{
+    cursor:pointer; list-style:none;
+    display:flex; align-items:baseline; gap: 1rem;
+    padding-block: var(--space-3);
+    font-weight: 700; font-size: 1rem;
+  }
+  .faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-item summary .q-tag{
+    font-family: var(--mono); font-size: .78rem; color: var(--brass); flex:none;
+  }
+  .faq-item summary .q-icon{
+    margin-left:auto; flex:none; width:18px; height:18px; position:relative;
+  }
+  .faq-item summary .q-icon::before,
+  .faq-item summary .q-icon::after{
+    content:""; position:absolute; background: var(--text); border-radius:1px;
+  }
+  .faq-item summary .q-icon::before{ inset: 8px 0; height:2px; }
+  .faq-item summary .q-icon::after{ inset: 0 8px; width:2px; transition: transform .25s var(--ease); }
+  .faq-item[open] summary .q-icon::after{ transform: rotate(90deg); }
+  .faq-item .faq-a{ padding-bottom: var(--space-3); max-width: 40rem; color: var(--text-muted); }
+
+  /* ---------- Final CTA ---------- */
+  .final{
+    position: relative;
+    background-color: var(--ink);
+    background-image:
+      radial-gradient(70% 65% at 84% 100%, rgba(184,134,63,.32), transparent 60%),
+      radial-gradient(60% 60% at 8% 0%,   rgba(47,106,99,.55), transparent 62%),
+      linear-gradient(165deg, #141b23 0%, #10151b 60%, #0c1015 100%);
+    color: var(--on-ink);
+    text-align: center;
+  }
+  .final .wrap{ max-width: 40rem; display:flex; flex-direction:column; align-items:center; }
+  .final h2{ font-size: var(--fs-h2); font-weight:600; color: var(--on-ink); margin-bottom: var(--space-3); }
+  .final p{ color: var(--on-ink-muted); max-width: 32rem; margin-bottom: var(--space-4); }
+
+  /* ---------- Footer ---------- */
+  footer{
+    background: var(--paper-2); border-top:1px solid var(--paper-3);
+    padding-block: var(--space-4);
+  }
+  footer .wrap{ display:flex; flex-wrap:wrap; gap: .75rem 1.5rem; align-items:center; justify-content:space-between; }
+  footer p{ font-family: var(--mono); font-size:.78rem; color: var(--text-faint); }
+
+  @media (min-width: 900px){
+    .promise-grid{ display:grid; grid-template-columns: 18rem 1fr; gap: var(--space-5); }
+    .benefit{ grid-template-columns: 3.25rem 1fr; align-items:start; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top" aria-label="JWI home">
+      <svg class="brand-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="1" y="1" width="30" height="30" rx="2" stroke="#b8863f" stroke-width="1.4"/>
+        <text x="16" y="21" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" font-weight="500" fill="#171b20">JW</text>
+      </svg>
+      <span class="brand-word">JWI<small>Regional Intelligence</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="#how-it-works">How It Works</a>
+      <a href="#benefits">Benefits</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a class="btn btn-primary btn-nav" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
+      Start With What&rsquo;s Already Working
+    </a>
+  </div>
+</nav>
+
+<main id="top">
+
+  <!-- HERO -->
+  <div class="mesh">
+    <header class="hero wrap">
+      <p class="eyebrow hero-tag reveal">
+        <b>FILE / UAE&#8209;ENTRY</b> &middot; STATUS: OPEN
+      </p>
+      <h1 class="reveal reveal-1">
+        Regional Intelligence.<br>
+        <span class="underline-word">Global
+          <svg viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M2 9.5C40 2.5 90 2 130 7C155 10 175 6 198 4.5" pathLength="1"/>
+          </svg>
+        </span> Standards.
+      </h1>
+      <div class="hero-foot reveal reveal-2">
+        <a class="btn btn-primary" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
+          Start With What&rsquo;s Already Working
+          <svg class="spark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2l1.6 6.4L20 10l-6.4 1.6L12 18l-1.6-6.4L4 10l6.4-1.6L12 2z" fill="#eef1ef"/>
+          </svg>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="#10151b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <span class="coords">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 22s7-6.8 7-12.5A7 7 0 0 0 5 9.5C5 15.2 12 22 12 22z" stroke="#9aa39d" stroke-width="1.5"/>
+            <circle cx="12" cy="9.5" r="2.4" stroke="#9aa39d" stroke-width="1.5"/>
+          </svg>
+          DUBAI &middot; <span class="num" data-count="25.2048">25.2048</span>&deg;N, <span class="num" data-count="55.2708">55.2708</span>&deg;E &middot; GST (UTC+4)
+        </span>
+      </div>
+    </header>
+  </div>
+
+  <!-- PROMISE -->
+  <section class="promise" id="how-it-works">
+    <div class="wrap promise-grid">
+      <div class="section-head reveal" style="margin-bottom:0;">
+        <p class="eyebrow">How It Works</p>
+        <h2>The promise</h2>
+      </div>
+      <div class="promise-body">
+        <hr class="promise-rule reveal">
+        <p class="reveal reveal-1">We build UAE campaigns from work that&rsquo;s already run here &mdash; not from a first guess made on your account.</p>
+        <p class="reveal reveal-2">Whatever industry you&rsquo;re in, what launches still looks and sounds like your brand, not a &ldquo;localized&rdquo; version of it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="benefits" id="benefits">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">What You Get</p>
+        <h2>Three things change<br>the moment we start.</h2>
+      </div>
+      <div class="benefit-list">
+
+        <div class="benefit reveal">
+          <span class="check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
+          <div>
+            <h3>Your brand stays your brand</h3>
+            <p>Your brand launches in the UAE as itself &mdash; not diluted into a generic &ldquo;local version&rdquo; that undercuts what made it work in the first place.</p>
+          </div>
+        </div>
+
+        <div class="benefit reveal reveal-1">
+          <span class="check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
+          <div>
+            <h3>No onboarding tax</h3>
+            <p>You skip the weeks most brands lose briefing a new agency on tone, context, and what not to say &mdash; we already know where the lines are here.</p>
+          </div>
+        </div>
+
+        <div class="benefit reveal reveal-2">
+          <span class="check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
+          <div>
+            <h3>No downgraded standard</h3>
+            <p>Your creative goes to market at the same production level as your global campaigns, because it&rsquo;s built by people who work at that level, not scaled down for a &ldquo;regional job.&rdquo;</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIAL -->
+  <section class="testimonial">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">From The Field</p>
+        <h2>What clients say</h2>
+      </div>
+      <div class="quote-panel reveal">
+        <span class="quote-mark" aria-hidden="true">&ldquo;</span>
+        <blockquote>This is where a client&rsquo;s actual words go &mdash; something specific about the launch, not a generic compliment.</blockquote>
+        <div class="quote-attrib">
+          <span class="dot"></span> Name, Title &middot; Company
+        </div>
+        <p class="quote-flag">PLACEHOLDER &mdash; swap in a real client quote before this page goes live.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- OBJECTION -->
+  <div class="objection">
+    <div class="wrap reveal">
+      <p class="eyebrow">The Honest Objection</p>
+      <p>Going <span class="underline-word">regional
+        <svg viewBox="0 0 220 14" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M2 9.5C45 2.5 95 2 140 7C168 10 190 6 218 4.5" pathLength="1"/>
+        </svg>
+      </span> doesn&rsquo;t mean your brand comes out looking regional.</p>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <section class="faq" id="faq">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Briefing Notes</p>
+        <h2>Before you ask</h2>
+      </div>
+      <div class="faq-list">
+
+        <details class="faq-item reveal">
+          <summary><span class="q-tag">Q1</span> What do you actually deliver?<span class="q-icon"></span></summary>
+          <p class="faq-a">Creative strategy and production: campaigns, content, and media-ready assets built for UAE audiences, produced to the same standard as your global work.</p>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary><span class="q-tag">Q2</span> Which industries do you work with?<span class="q-icon"></span></summary>
+          <p class="faq-a">FMCG and F&amp;B brands, along with companies across other categories entering the UAE. The process holds regardless of what you sell.</p>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary><span class="q-tag">Q3</span> How long does a launch take?<span class="q-icon"></span></summary>
+          <p class="faq-a">It depends on scope &mdash; a single campaign moves faster than a full market-entry rollout. We&rsquo;ll give you a real timeline once we know what you&rsquo;re launching.</p>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary><span class="q-tag">Q4</span> How is this different from a global agency&rsquo;s regional office, or a local UAE agency?<span class="q-icon"></span></summary>
+          <p class="faq-a">A global agency&rsquo;s regional office is often still learning this market. A local agency may not carry your brand&rsquo;s global standards. We work from both at once &mdash; that&rsquo;s the whole premise.</p>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <div class="final">
+    <div class="wrap reveal">
+      <p class="eyebrow" style="color:var(--on-ink-muted); margin-bottom:1rem;">Ready When You Are</p>
+      <h2>Regional Intelligence.<br>Global Standards.</h2>
+      <p>Bring the market you don&rsquo;t know yet. We bring the work that already runs in it.</p>
+      <a class="btn btn-primary" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
+        Start With What&rsquo;s Already Working
+        <svg class="spark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 2l1.6 6.4L20 10l-6.4 1.6L12 18l-1.6-6.4L4 10l6.4-1.6L12 2z" fill="#eef1ef"/>
+        </svg>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="#10151b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>JWI &middot; REGIONAL INTELLIGENCE, GLOBAL STANDARDS</p>
+    <p>FILE / UAE&#8209;ENTRY &middot; DUBAI 25.2048&deg;N 55.2708&deg;E</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  document.documentElement.classList.add('js-ready');
+
+  var els = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(function(el){ io.observe(el); });
+  } else {
+    els.forEach(function(el){ el.classList.add('in-view'); });
+  }
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var nums = document.querySelectorAll('.num[data-count]');
+  if(!reduced && nums.length){
+    var counted = false;
+    var runCount = function(){
+      if(counted) return;
+      counted = true;
+      nums.forEach(function(el){
+        var target = parseFloat(el.getAttribute('data-count'));
+        var dur = 900, start = null;
+        var step = function(ts){
+          if(start === null) start = ts;
+          var p = Math.min((ts - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = (target * eased).toFixed(4);
+          if(p < 1) requestAnimationFrame(step);
+          else el.textContent = target.toFixed(4);
+        };
+        requestAnimationFrame(step);
+      });
+    };
+    if('IntersectionObserver' in window){
+      var io2 = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting) runCount(); });
+      }, { threshold: 0.3 });
+      io2.observe(document.querySelector('.coords'));
+    } else {
+      runCount();
+    }
+  }
+})();
+</script>
+
+</body>
+</html>
