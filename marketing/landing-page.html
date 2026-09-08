@@ -36,7 +36,7 @@
     font-display: swap;
   }
 
-  /* ---------- Tokens (from JWI design.md) ---------- */
+/* ---------- Tokens (from JWI design.md) ---------- */
   :root{
     --black:  #141414;
     --white:  #FBFBFB;
@@ -79,7 +79,8 @@
   ::selection{ background: var(--black); color: var(--beige); }
 
   .wrap{ max-width: var(--max); margin: 0 auto; padding-inline: 1.25rem; }
-  @media (min-width: 640px){ .wrap{ padding-inline: 2.5rem; } }
+  @media (min-width: 640px){ .wrap{ padding-inline: 2.75rem; } }
+  @media (min-width: 1240px){ .wrap{ padding-inline: 4rem; } }
 
   .eyebrow{ font-family: var(--body); font-weight: 600; font-size: var(--fs-eyebrow); text-transform: uppercase; letter-spacing: .16em; }
   .caption{ font-family: var(--body); font-weight: 300; font-size: var(--fs-caption); letter-spacing: .04em; }
@@ -118,7 +119,7 @@
   /* ---------- Nav: light utility bar, not a black brand bar ---------- */
   .nav{ position: sticky; top:0; z-index: 50; background: var(--beige); border-bottom: 1px solid transparent; transition: border-color .4s var(--ease-snap); }
   html.is-scrolled .nav{ border-bottom-color: rgba(20,20,20,.14); }
-  .nav-inner{ display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-block:1.05rem; }
+  .nav-inner{ display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-block:1.3rem; }
   .brand{ text-decoration:none; color: var(--black); font-family: var(--display); font-size:1.05rem; letter-spacing:.12em; }
   .nav-links{ display:none; align-items:center; gap:2rem; font-family:var(--display); font-size:.78rem; letter-spacing:.12em; color: var(--black); }
   .nav-links a{ text-decoration:none; position:relative; padding-bottom:.2rem; }
@@ -128,8 +129,7 @@
 
   /* ---------- Masthead: white canvas, left-aligned, ink not block ---------- */
   .masthead{ background: var(--white); color: var(--black); }
-  .masthead .wrap{ padding-block: clamp(4rem, 3.2rem + 5vw, 7.5rem); display:flex; flex-direction:column; align-items:flex-start; gap: var(--space-5); }
-  .masthead-eyebrow{ color: rgba(20,20,20,.55); }
+  .masthead .wrap{ padding-block: clamp(4.5rem, 3.4rem + 6vw, 8.5rem); display:flex; flex-direction:column; align-items:flex-start; gap: var(--space-6); }
   .masthead h1{
     font-size: var(--fs-hero); line-height: 1.0; letter-spacing:-0.01em; text-transform:uppercase;
     color: var(--black); max-width: 17ch; text-align:left;
@@ -162,7 +162,7 @@
 
   /* ---------- Benefits as a contents index (folio + dotted leader + draw-on check) ---------- */
   .idx-row{ display:flex; align-items:baseline; gap:.85rem; flex-wrap:wrap; padding-top: var(--space-4); }
-  .idx-num{ font-family:var(--body); font-weight:600; font-size:.82rem; color: rgba(20,20,20,.4); font-variant-numeric: tabular-nums; }
+  .idx-num{ font-family:var(--body); font-weight:600; font-size:.82rem; letter-spacing:.03em; color: rgba(20,20,20,.4); font-variant-numeric: tabular-nums; }
   .idx-title{ font-family: var(--display); font-size: var(--fs-h3); color: var(--black); }
   .idx-leader{ flex:1 1 6rem; min-width:2rem; align-self:center; height:0; border-bottom:2px dotted rgba(20,20,20,.32); margin-bottom:.4em; }
   @media (max-width:480px){ .idx-leader{ display:none; } }
@@ -176,7 +176,7 @@
 
   /* ---------- Testimonial: marginal note, not a centered moment ---------- */
   .testimonial .wrap{ max-width: 34rem; }
-  .testimonial-inner{ border-left: 2px solid var(--black); padding-left: var(--space-4); }
+  .testimonial-inner{ border-left: 1px solid var(--black); padding-left: var(--space-5); }
   .testimonial blockquote{ margin:0; font-family:var(--display); font-size: var(--fs-quote); line-height:1.44; color: var(--black); text-align:left; }
   .attrib{ margin-top: var(--space-3); }
   .flag{ margin-top: var(--space-2); color: rgba(20,20,20,.5); }
@@ -207,7 +207,7 @@
   .final .wrap{ display:flex; justify-content:center; }
   .card{
     position:relative; background: var(--white); border: 1px solid var(--black);
-    padding: clamp(2.5rem, 2rem + 2.4vw, 3.75rem); max-width: 28rem; width:100%;
+    padding: clamp(3rem, 2.3rem + 3vw, 4.5rem); max-width: 29rem; width:100%;
     text-align:center; display:flex; flex-direction:column; align-items:center; gap: var(--space-4);
   }
   .card::before, .card::after{ content:""; position:absolute; width:13px; height:13px; border: 1px solid var(--black); }
@@ -218,8 +218,8 @@
 
   /* ---------- Footer ---------- */
   footer{ background: var(--white); border-top: 1px solid rgba(20,20,20,.12); }
-  footer .wrap{ display:flex; flex-wrap:wrap; gap:.6rem 1.5rem; align-items:center; justify-content:space-between; padding-block: var(--space-3); }
-  footer .caption{ color: rgba(20,20,20,.5); }
+  footer .wrap{ display:flex; justify-content:center; padding-block: var(--space-4); }
+  footer .caption{ color: rgba(20,20,20,.48); letter-spacing:.08em; }
 </style>
 </head>
 <body>
@@ -243,9 +243,8 @@
   <!-- MASTHEAD -->
   <header class="masthead">
     <div class="wrap">
-      <span class="eyebrow masthead-eyebrow reveal">UAE Market Entry</span>
-      <h1 class="reveal d1">Regional Intelligence.<br>Global Standards.</h1>
-      <a class="btn-ghost btn-ghost-dark reveal d2" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
+      <h1 class="reveal">Regional Intelligence.<br>Global Standards.</h1>
+      <a class="btn-ghost btn-ghost-dark reveal d1" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
         Start With What&rsquo;s Already Working
       </a>
     </div>
@@ -272,7 +271,7 @@
 
       <div class="idx-row-wrap">
         <div class="idx-row snap">
-          <span class="idx-num">01</span>
+          <span class="idx-num">01.</span>
           <span class="idx-title">Your Brand Stays Your Brand</span>
           <span class="idx-leader"></span>
           <span class="idx-mark check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
@@ -282,7 +281,7 @@
 
       <div class="idx-row-wrap">
         <div class="idx-row snap d1">
-          <span class="idx-num">02</span>
+          <span class="idx-num">02.</span>
           <span class="idx-title">No Onboarding Tax</span>
           <span class="idx-leader"></span>
           <span class="idx-mark check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
@@ -292,7 +291,7 @@
 
       <div class="idx-row-wrap">
         <div class="idx-row snap d2">
-          <span class="idx-num">03</span>
+          <span class="idx-num">03.</span>
           <span class="idx-title">No Downgraded Standard</span>
           <span class="idx-leader"></span>
           <span class="idx-mark check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
@@ -386,7 +385,6 @@
 <footer>
   <div class="wrap">
     <p class="caption caps">JWI &middot; Regional Intelligence, Global Standards</p>
-    <p class="caption caps">UAE Market Entry</p>
   </div>
 </footer>
 
