@@ -46,15 +46,14 @@
     --body:    "Maison Neue", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
 
     --fs-caption: 0.74rem;
-    --fs-small:   0.9rem;
     --fs-body:    1.05rem;
-    --fs-eyebrow: 0.78rem;
+    --fs-eyebrow: 0.76rem;
     --fs-h3:      clamp(1.4rem, 1.15rem + 1vw, 1.9rem);
     --fs-h2:      clamp(1.9rem, 1.5rem + 1.8vw, 2.7rem);
-    --fs-hero:    clamp(2.6rem, 1.4rem + 5.4vw, 5.6rem);
-    --fs-quote:   clamp(1.4rem, 1.05rem + 1.6vw, 2.35rem);
+    --fs-hero:    clamp(2.9rem, 1.3rem + 6.6vw, 6.4rem);
+    --fs-quote:   clamp(1.5rem, 1.05rem + 2vw, 2.6rem);
+    --fs-cine:    clamp(1.6rem, 1.1rem + 2.4vw, 3rem);
 
-    --space-1: 0.5rem;
     --space-2: 0.9rem;
     --space-3: 1.5rem;
     --space-4: 2.25rem;
@@ -62,23 +61,18 @@
     --space-6: 6rem;
 
     --max: 1180px;
-    --ease: cubic-bezier(.22,.61,.36,1);
-    --cut: clamp(2.25rem, 4vw, 4rem);
+
+    /* two moods, on purpose: cinematic (slow, generous) and snappy (utility, precise) */
+    --ease-slow: cubic-bezier(.22,.61,.36,1);
+    --ease-snap: cubic-bezier(.16,1,.3,1);
   }
 
   *,*::before,*::after{ box-sizing: border-box; }
   html{ scroll-behavior: smooth; }
   body{
-    margin:0;
-    background: var(--white);
-    color: var(--black);
-    font-family: var(--body);
-    font-weight: 400;
-    font-size: var(--fs-body);
-    line-height: 1.62;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-    overflow-x: hidden;
+    margin:0; background: var(--white); color: var(--black);
+    font-family: var(--body); font-weight: 400; font-size: var(--fs-body); line-height: 1.62;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; overflow-x: hidden;
   }
   h1,h2,h3{ font-family: var(--display); font-weight: 400; margin: 0; text-wrap: balance; }
   p{ margin:0; }
@@ -88,218 +82,158 @@
   .wrap{ max-width: var(--max); margin: 0 auto; padding-inline: 1.25rem; }
   @media (min-width: 640px){ .wrap{ padding-inline: 2.5rem; } }
 
-  .caps{ text-transform: uppercase; letter-spacing: .09em; }
   .eyebrow{
     font-family: var(--body); font-weight: 600; font-size: var(--fs-eyebrow);
-    text-transform: uppercase; letter-spacing: .14em;
+    text-transform: uppercase; letter-spacing: .16em;
   }
   .caption{ font-family: var(--body); font-weight: 300; font-size: var(--fs-caption); letter-spacing: .04em; }
+  .caps{ text-transform:uppercase; letter-spacing:.1em; }
 
-  /* ---------- Motion: safe-by-default reveals ---------- */
-  .reveal{ opacity: 1; transform: none; }
-  html.js-ready .reveal{
-    opacity: 0; transform: translateY(16px);
-    transition: opacity .7s var(--ease), transform .7s var(--ease);
-  }
-  html.js-ready .reveal.in-view{ opacity: 1; transform: none; }
-  .d1{ transition-delay: .08s; } .d2{ transition-delay: .16s; }
-  .d3{ transition-delay: .24s; } .d4{ transition-delay: .32s; }
+  /* ---------- Reveals: two speeds, safe-by-default ---------- */
+  .reveal{ opacity:1; transform:none; }
+  .snap{ opacity:1; transform:none; }
+  html.js-ready .reveal{ opacity:0; transform: translateY(14px); transition: opacity .8s var(--ease-slow), transform .8s var(--ease-slow); }
+  html.js-ready .reveal.in-view{ opacity:1; transform:none; }
+  html.js-ready .snap{ opacity:0; transform: translateY(8px); transition: opacity .35s var(--ease-snap), transform .35s var(--ease-snap); }
+  html.js-ready .snap.in-view{ opacity:1; transform:none; }
+  .d1{ transition-delay:.06s; } .d2{ transition-delay:.12s; } .d3{ transition-delay:.18s; }
 
   @media (prefers-reduced-motion: reduce){
-    html{ scroll-behavior: auto; }
-    html.js-ready .reveal{ transition: none; opacity: 1; transform: none; }
-    *{ animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    html{ scroll-behavior:auto; }
+    html.js-ready .reveal, html.js-ready .snap{ transition:none; opacity:1; transform:none; }
+    *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
   }
 
-  /* ---------- Buttons ---------- */
-  .btn{
-    font-family: var(--body); font-weight: 600; font-size: .82rem;
-    text-transform: uppercase; letter-spacing: .1em;
-    display: inline-flex; align-items: center; gap: .6rem;
-    padding: .95rem 1.5rem;
-    background: var(--white); color: var(--black);
-    text-decoration: none; white-space: nowrap; border: 1px solid var(--white);
-    transition: transform .3s var(--ease), letter-spacing .3s var(--ease);
-  }
-  .btn:hover{ transform: translateY(-2px); letter-spacing: .14em; }
-  .btn:focus-visible{ outline: 2px solid var(--beige); outline-offset: 3px; }
-  .btn-nav{ padding: .6rem 1.1rem; font-size: .72rem; }
-
-  /* Stamp CTA — the hero/final signature device, rotated like a hand-stamped approval mark */
-  .stamp{
+  /* ---------- Ghost button: one consistent primary-action style ---------- */
+  .btn-ghost{
     display:inline-flex; align-items:center; gap:.6rem;
-    font-family: var(--body); font-weight: 600; font-size: .84rem;
-    text-transform: uppercase; letter-spacing: .1em;
-    padding: 1.1rem 1.6rem;
-    border: 1px solid var(--black); color: var(--black);
-    text-decoration:none; background: transparent;
-    transform: rotate(-3deg);
-    transition: transform .4s var(--ease), background .4s var(--ease), color .4s var(--ease);
+    font-family: var(--body); font-weight:600; font-size:.82rem;
+    text-transform:uppercase; letter-spacing:.12em;
+    padding: 1.05rem 1.7rem; border:1px solid var(--beige); color: var(--beige);
+    background:transparent; text-decoration:none;
+    transition: background .3s var(--ease-snap), color .3s var(--ease-snap), transform .3s var(--ease-snap);
   }
-  .stamp:hover{ transform: rotate(0deg) translateY(-2px); background: var(--black); color: var(--beige); }
-  .stamp:focus-visible{ outline: 2px solid var(--black); outline-offset: 4px; }
-  .stamp-on-black{ border-color: var(--beige); color: var(--beige); }
-  .stamp-on-black:hover{ background: var(--beige); color: var(--black); }
+  .btn-ghost:hover{ background: var(--beige); color: var(--black); transform: translateY(-2px); }
+  .btn-ghost:focus-visible{ outline:2px solid var(--beige); outline-offset:3px; }
+  .btn-ghost-sm{ padding:.55rem .95rem; font-size:.7rem; }
 
-  /* ---------- Nav (compresses on scroll) ---------- */
+  /* ---------- Nav: blends into hero, solidifies on scroll ---------- */
   .nav{
-    position: sticky; top:0; z-index: 50;
-    background: var(--black);
-    transition: padding .35s var(--ease);
+    position: sticky; top:0; z-index: 50; background: transparent;
+    border-bottom: 1px solid transparent;
+    transition: background .4s var(--ease-snap), border-color .4s var(--ease-snap);
   }
-  .nav-inner{
-    display:flex; align-items:center; justify-content:space-between;
-    gap: 1rem; padding-block: 1.05rem; transition: padding .35s var(--ease);
-  }
-  html.is-scrolled .nav-inner{ padding-block: .55rem; }
-  .brand{ text-decoration:none; color: var(--beige); font-family: var(--display); font-size: 1.05rem; letter-spacing: .12em; }
-  .nav-links{ display:none; align-items:center; gap: 2rem; font-family: var(--display); font-size: .78rem; letter-spacing: .12em; color: var(--beige); }
-  .nav-links a{ text-decoration:none; position:relative; padding-bottom: .2rem; }
-  .nav-links a::after{ content:""; position:absolute; left:0; right:100%; bottom:0; height:1px; background: var(--beige); transition: right .3s var(--ease); }
+  html.is-scrolled .nav{ background: var(--black); border-bottom-color: rgba(239,238,234,.14); }
+  .nav-inner{ display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-block:1.1rem; }
+  .brand{ text-decoration:none; color: var(--beige); font-family: var(--display); font-size:1.05rem; letter-spacing:.12em; }
+  .nav-links{ display:none; align-items:center; gap:2rem; font-family:var(--display); font-size:.78rem; letter-spacing:.12em; color: var(--beige); }
+  .nav-links a{ text-decoration:none; position:relative; padding-bottom:.2rem; }
+  .nav-links a::after{ content:""; position:absolute; left:0; right:100%; bottom:0; height:1px; background:var(--beige); transition:right .25s var(--ease-snap); }
   .nav-links a:hover::after{ right:0; }
-  @media (min-width: 780px){ .nav-links{ display:flex; } }
+  @media (min-width:780px){ .nav-links{ display:flex; } }
 
-  /* ---------- Hero: asymmetric split panel ---------- */
-  .hero{ position:relative; background: var(--black); color: var(--beige); }
-  .hero-grid{
-    display:flex; flex-direction:column;
-    max-width: 1680px; margin-inline: auto;
-    padding-block: clamp(3.5rem, 3rem + 3vw, 5.5rem);
-    padding-inline: 1.25rem; gap: var(--space-5);
-  }
-  @media (min-width: 640px){ .hero-grid{ padding-inline: 2.5rem; } }
-  .hero-copy{ max-width: 46rem; }
-  .hero-eyebrow{ color: var(--beige); opacity: .6; margin-bottom: var(--space-3); display:block; }
+  /* ---------- Hero: restrained, centered, huge type, generous air ---------- */
+  .hero{ background: var(--black); color: var(--beige); text-align:center; }
+  .hero .wrap{ padding-block: clamp(5rem, 4rem + 7vw, 9rem); display:flex; flex-direction:column; align-items:center; gap: var(--space-5); }
+  .hero-eyebrow{ color: var(--beige); opacity:.6; }
   .hero h1{
-    font-size: var(--fs-hero); line-height: 0.98; letter-spacing: -0.01em;
-    text-transform: uppercase; color: var(--beige);
+    font-size: var(--fs-hero); line-height: 0.98; letter-spacing:-0.015em; text-transform:uppercase;
+    color: var(--beige); max-width: 15ch;
   }
   .word{ display:inline-block; }
-  .hero-panel{
-    background: var(--beige); color: var(--black);
-    padding: var(--space-4); align-self: flex-start;
-    display:flex; flex-direction:column; gap: var(--space-2);
-  }
-  .hero-panel .caption{ color: rgba(20,20,20,.6); }
+  html.js-ready .word{ opacity:0; transform: translateY(.4em) scale(1.04); transition: opacity .7s var(--ease-snap), transform .7s var(--ease-snap); }
+  html.js-ready .word.in-view{ opacity:1; transform:none; }
 
-  @media (min-width: 900px){
-    .hero-grid{
-      position:relative; flex-direction:row; align-items:flex-end; justify-content:space-between;
-      padding-block: clamp(5rem, 4rem + 5vw, 8.5rem);
-      padding-right: 0;
-    }
-    .hero-copy{ max-width: 54%; }
-    .hero-panel{
-      align-self: stretch; justify-content:flex-end;
-      width: 30%; min-width: 19rem;
-      padding: var(--space-5) var(--space-4);
-      clip-path: polygon(16% 0, 100% 0, 100% 100%, 0% 100%);
-    }
+  /* ---------- Cinematic pinned sequence (JS-enhanced only; static by default) ---------- */
+  .cine{ background: var(--beige); }
+  .cine-spacer{ position:relative; }
+  .cine-pin{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    padding-block: clamp(4.5rem, 3.6rem + 4vw, 7rem); gap: var(--space-3);
   }
+  .cine-eyebrow{ color: var(--black); opacity:.55; }
+  .cine-line{ font-family: var(--display); font-size: var(--fs-cine); line-height:1.32; color: var(--black); max-width: 30ch; }
 
-  /* ---------- Diagonal cut (shared signature: light section → black section) ---------- */
-  .cut-top{ position: relative; }
-  .cut-top::before{
-    content:""; position:absolute; left:-2vw; right:-2vw; top:0; height: var(--cut);
-    background: var(--black); transform: skewY(-1.6deg); transform-origin: top left;
-    z-index: 1; pointer-events:none;
+  html.cine-on .cine-spacer{ height: 260vh; }
+  @media (max-width: 640px){ html.cine-on .cine-spacer{ height: 210vh; } }
+  html.cine-on .cine-pin{
+    position: sticky; top:0; height:100vh; padding-block:0; overflow:hidden;
   }
-  .cut-top > .wrap, .cut-top .hero-grid{ position:relative; z-index:2; }
+  html.cine-on .cine-eyebrow, html.cine-on .cine-line{ position:absolute; opacity:0; will-change: opacity, transform; }
+  html.cine-on .cine-eyebrow{ top: 32%; }
+  html.cine-on .cine-line{ top:50%; transform: translateY(-50%) scale(.94); }
 
-  /* ---------- Section rhythm ---------- */
-  section{ padding-block: clamp(4.5rem, 3.4rem + 3.8vw, 7.5rem); }
-  .promise{ padding-block: clamp(4rem, 3.2rem + 3.2vw, 6rem); }
-  .section-head{ margin-bottom: var(--space-5); max-width: 34rem; }
+  /* ---------- Section rhythm: deliberate contrast, not uniform ---------- */
+  .benefits{ background: var(--black); color: var(--beige); padding-block: clamp(3.5rem, 3rem + 2.4vw, 5rem); }
+  .testimonial{ background: var(--beige); padding-block: clamp(5.5rem, 4.4rem + 5vw, 9rem); }
+  .objection{ background: var(--black); color: var(--beige); padding-block: clamp(3rem, 2.5rem + 2vw, 4.25rem); }
+  .faq{ background: var(--white); padding-block: clamp(4.5rem, 3.6rem + 3vw, 6.5rem); }
+  .final{ background: var(--black); color: var(--beige); padding-block: clamp(5.5rem, 4.4rem + 5vw, 9rem); }
+
+  .section-head{ margin-bottom: var(--space-5); max-width: 32rem; }
   .section-head h2{ font-size: var(--fs-h2); line-height:1.06; letter-spacing:-0.008em; text-transform:uppercase; }
   .section-head .eyebrow{ display:block; margin-bottom: var(--space-2); }
 
-  /* ---------- Promise / Testimonial: ghost-quote watermark block ---------- */
-  .quote-block{ position:relative; overflow:hidden; }
-  .quote-block::before{
-    content:"\201C"; position:absolute; top:-0.3em; left:50%; transform:translateX(-50%);
-    font-family: var(--display); font-size: 15rem; line-height:1; color: var(--black);
-    opacity:.05; pointer-events:none; white-space:nowrap;
-  }
-  .final .quote-block::before, .objection .quote-block::before{ color: var(--beige); opacity:.06; }
-
-  .promise{ background: var(--beige); }
-  .promise .wrap{ max-width: 42rem; position:relative; z-index:1; text-align:center; }
-  .promise p{ font-family: var(--display); font-size: var(--fs-quote); line-height: 1.46; color: var(--black); }
-  .promise p + p{ margin-top: var(--space-3); }
-
-  .testimonial{ background: var(--beige); }
-  .testimonial .wrap{ max-width: 40rem; position:relative; z-index:1; text-align:center; }
-  .testimonial blockquote{ margin:0; font-family: var(--display); font-size: var(--fs-quote); line-height:1.46; color: var(--black); }
-  .attrib{ margin-top: var(--space-4); }
-  .flag{ margin-top: var(--space-2); color: rgba(20,20,20,.5); }
-
-  /* ---------- Benefits: alternating rows, not a grid ---------- */
-  .benefits{ background: var(--black); color: var(--beige); }
+  /* ---------- Benefits: alternating rows, snappy ---------- */
   .benefits .section-head .eyebrow{ opacity:.6; }
   .benefits .section-head h2{ color: var(--beige); }
   .benefit-row{
-    display:flex; flex-direction:column; gap: var(--space-3);
-    padding-block: var(--space-5);
-    border-top: 1px solid rgba(239,238,234,.16);
+    display:flex; flex-direction:column; gap: var(--space-2);
+    padding-block: var(--space-4); border-top: 1px solid rgba(239,238,234,.16);
   }
   .benefit-row:last-child{ border-bottom: 1px solid rgba(239,238,234,.16); }
-  @media (min-width: 780px){
+  @media (min-width:780px){
     .benefit-row{ flex-direction:row; justify-content:space-between; align-items:flex-start; gap: var(--space-6); }
     .benefit-row:nth-child(even){ flex-direction:row-reverse; }
   }
-  .benefit-mark{ flex: 0 0 auto; display:flex; align-items:center; gap:.75rem; min-width: 11rem; }
-  .check svg{ width:20px; height:20px; display:block; flex:none; }
-  .check path{
-    fill:none; stroke: var(--beige); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
-    stroke-dasharray: 1; stroke-dashoffset: 0;
-  }
-  html.js-ready .check path{ stroke-dashoffset: 1; transition: stroke-dashoffset .8s var(--ease) .2s; }
-  html.js-ready .in-view .check path{ stroke-dashoffset: 0; }
-  .benefit-copy{ max-width: 34rem; }
+  .benefit-mark{ flex:0 0 auto; display:flex; align-items:center; gap:.7rem; min-width:10.5rem; }
+  .check svg{ width:18px; height:18px; display:block; flex:none; }
+  .check path{ fill:none; stroke:var(--beige); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:0; }
+  html.js-ready .check path{ stroke-dashoffset:1; transition: stroke-dashoffset .5s var(--ease-snap) .1s; }
+  html.js-ready .in-view .check path{ stroke-dashoffset:0; }
+  .benefit-copy{ max-width:32rem; }
   .benefit-copy h3{ font-size: var(--fs-h3); color: var(--beige); margin-bottom: var(--space-2); line-height:1.15; }
   .benefit-copy p{ color: rgba(239,238,234,.75); }
 
-  /* ---------- Objection band ---------- */
-  .objection{ background: var(--black); color: var(--beige); }
-  .objection .wrap{ max-width: 40rem; position:relative; z-index:1; text-align:center; }
+  /* ---------- Testimonial: large, quiet, generous ---------- */
+  .testimonial .wrap{ max-width: 40rem; text-align:center; }
+  .testimonial blockquote{ margin:0; font-family:var(--display); font-size: var(--fs-quote); line-height:1.4; color: var(--black); }
+  .attrib{ margin-top: var(--space-4); }
+  .flag{ margin-top: var(--space-2); color: rgba(20,20,20,.5); }
+
+  /* ---------- Objection: short, punchy, wipes into view ---------- */
+  .objection .wrap{ max-width: 38rem; text-align:center; }
   .objection .eyebrow{ display:block; margin-bottom: var(--space-3); opacity:.6; }
   .objection p{
-    font-family: var(--display); font-style: italic;
-    font-size: clamp(1.55rem, 1.2rem + 1.9vw, 2.4rem); line-height: 1.3; color: var(--beige);
+    font-family: var(--display); font-style:italic;
+    font-size: clamp(1.5rem, 1.15rem + 1.8vw, 2.3rem); line-height:1.28; color: var(--beige);
+    display:inline-block;
   }
+  html.js-ready .objection p{ clip-path: inset(0 100% 0 0); transition: clip-path .9s var(--ease-slow) .1s; }
+  html.js-ready .objection.in-view p{ clip-path: inset(0 0 0 0); }
 
-  /* ---------- FAQ: indexed two-column ---------- */
-  .faq{ background: var(--white); }
+  /* ---------- FAQ: indexed two-column, snappy expand ---------- */
   .faq-list{ max-width: 50rem; }
-  .faq-item{ border-top: 1px solid var(--black); padding-block: var(--space-4); display:grid; gap: var(--space-2); }
-  .faq-list .faq-item:last-child{ border-bottom: 1px solid var(--black); }
-  @media (min-width: 760px){
-    .faq-item{ grid-template-columns: 9rem 1fr; gap: var(--space-5); align-items:baseline; }
-  }
-  .faq-index{ font-family: var(--body); font-weight: 600; font-size: var(--fs-eyebrow); text-transform:uppercase; letter-spacing:.14em; color: rgba(20,20,20,.45); }
-  .faq-body summary{
-    cursor:pointer; list-style:none; display:flex; align-items:center; gap: 1rem;
-    font-family: var(--body); font-weight: 600; font-size: 1.05rem;
-  }
+  .faq-item{ border-top:1px solid var(--black); padding-block: var(--space-3); display:grid; gap:var(--space-2); }
+  .faq-list .faq-item:last-child{ border-bottom:1px solid var(--black); }
+  @media (min-width:760px){ .faq-item{ grid-template-columns: 9rem 1fr; gap: var(--space-5); align-items:baseline; } }
+  .faq-index{ font-family:var(--body); font-weight:600; font-size:var(--fs-eyebrow); text-transform:uppercase; letter-spacing:.14em; color: rgba(20,20,20,.45); }
+  .faq-body summary{ cursor:pointer; list-style:none; display:flex; align-items:center; gap:1rem; font-family:var(--body); font-weight:600; font-size:1.02rem; }
   .faq-body summary::-webkit-details-marker{ display:none; }
   .faq-body summary .q-icon{ margin-left:auto; flex:none; width:16px; height:16px; position:relative; }
-  .faq-body summary .q-icon::before, .faq-body summary .q-icon::after{ content:""; position:absolute; background: var(--black); }
-  .faq-body summary .q-icon::before{ inset: 7px 0; height:1.5px; }
-  .faq-body summary .q-icon::after{ inset: 0 7px; width:1.5px; transition: transform .25s var(--ease); }
+  .faq-body summary .q-icon::before, .faq-body summary .q-icon::after{ content:""; position:absolute; background:var(--black); }
+  .faq-body summary .q-icon::before{ inset:7px 0; height:1.5px; }
+  .faq-body summary .q-icon::after{ inset:0 7px; width:1.5px; transition: transform .2s var(--ease-snap); }
   .faq-body[open] summary .q-icon::after{ transform: rotate(90deg); }
-  .faq-body .faq-a{ padding-top: var(--space-2); max-width: 40rem; color: rgba(20,20,20,.7); }
+  .faq-body .faq-a{ padding-top: var(--space-2); max-width:40rem; color: rgba(20,20,20,.7); }
 
-  /* ---------- Final CTA ---------- */
-  .final{ background: var(--black); color: var(--beige); }
-  .final .wrap{ position:relative; z-index:1; max-width: 42rem; text-align:center; display:flex; flex-direction:column; align-items:center; }
-  .final h2{
-    font-size: var(--fs-h2); line-height: 1.04; letter-spacing: -0.01em;
-    text-transform: uppercase; color: var(--beige); margin-bottom: var(--space-5);
-  }
+  /* ---------- Final CTA: mirrors hero exactly ---------- */
+  .final .wrap{ padding-block:0; max-width:40rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap: var(--space-5); }
+  .final h2{ font-size: var(--fs-hero); line-height:0.98; letter-spacing:-0.015em; text-transform:uppercase; color: var(--beige); max-width:15ch; }
 
   /* ---------- Footer ---------- */
   footer{ background: var(--beige); }
-  footer .wrap{ display:flex; flex-wrap:wrap; gap: .6rem 1.5rem; align-items:center; justify-content:space-between; padding-block: var(--space-3); }
+  footer .wrap{ display:flex; flex-wrap:wrap; gap:.6rem 1.5rem; align-items:center; justify-content:space-between; padding-block: var(--space-3); }
   footer .caption{ color: rgba(20,20,20,.55); }
 </style>
 </head>
@@ -313,7 +247,7 @@
       <a href="#benefits">Benefits</a>
       <a href="#faq">FAQ</a>
     </div>
-    <a class="btn btn-nav" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
+    <a class="btn-ghost btn-ghost-sm" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
       Start With What&rsquo;s Already Working
     </a>
   </div>
@@ -323,41 +257,38 @@
 
   <!-- HERO -->
   <header class="hero">
-    <div class="hero-grid">
-      <div class="hero-copy">
-        <span class="eyebrow hero-eyebrow reveal">UAE Market Entry</span>
-        <h1>
-          <span class="word reveal">Regional</span> <span class="word reveal d1">Intelligence.</span><br>
-          <span class="word reveal d2">Global</span> <span class="word reveal d3">Standards.</span>
-        </h1>
-      </div>
-      <div class="hero-panel reveal d4">
-        <span class="caption caps">File &middot; UAE Entry</span>
-        <a class="stamp magnetic" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
-          Start With What&rsquo;s Already Working
-        </a>
-      </div>
+    <div class="wrap">
+      <span class="eyebrow hero-eyebrow reveal">UAE Market Entry</span>
+      <h1>
+        <span class="word">Regional</span> <span class="word">Intelligence.</span><br>
+        <span class="word">Global</span> <span class="word">Standards.</span>
+      </h1>
+      <a class="btn-ghost reveal d2" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
+        Start With What&rsquo;s Already Working
+      </a>
     </div>
   </header>
 
-  <!-- PROMISE -->
-  <section class="promise quote-block" id="how-it-works">
-    <div class="wrap">
-      <p class="eyebrow reveal">How It Works</p>
-      <p class="reveal d1">We build UAE campaigns from work that&rsquo;s already run here, not from a first guess made on your account.</p>
-      <p class="reveal d2">Whatever industry you&rsquo;re in, what launches still looks and sounds like your brand, not a &ldquo;localized&rdquo; version of it.</p>
+  <!-- PROMISE — cinematic pinned type sequence -->
+  <section class="cine" id="how-it-works">
+    <div class="cine-spacer">
+      <div class="cine-pin">
+        <p class="eyebrow cine-eyebrow">How It Works</p>
+        <p class="cine-line cine-line-1">We build UAE campaigns from work that&rsquo;s already run here, not from a first guess made on your account.</p>
+        <p class="cine-line cine-line-2">Whatever industry you&rsquo;re in, what launches still looks and sounds like your brand, not a &ldquo;localized&rdquo; version of it.</p>
+      </div>
     </div>
   </section>
 
   <!-- BENEFITS -->
-  <section class="benefits cut-top" id="benefits">
+  <section class="benefits" id="benefits">
     <div class="wrap">
-      <div class="section-head reveal">
+      <div class="section-head snap">
         <p class="eyebrow">What Changes</p>
         <h2>Three Things Change The Moment We Start</h2>
       </div>
 
-      <div class="benefit-row reveal">
+      <div class="benefit-row snap">
         <div class="benefit-mark">
           <span class="check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
           <span class="eyebrow">On Brand</span>
@@ -368,7 +299,7 @@
         </div>
       </div>
 
-      <div class="benefit-row reveal d1">
+      <div class="benefit-row snap d1">
         <div class="benefit-mark">
           <span class="check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
           <span class="eyebrow">On Time</span>
@@ -379,7 +310,7 @@
         </div>
       </div>
 
-      <div class="benefit-row reveal d2">
+      <div class="benefit-row snap d2">
         <div class="benefit-mark">
           <span class="check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
           <span class="eyebrow">On Standard</span>
@@ -393,7 +324,7 @@
   </section>
 
   <!-- TESTIMONIAL -->
-  <section class="testimonial quote-block">
+  <section class="testimonial">
     <div class="wrap">
       <p class="eyebrow reveal">From The Field</p>
       <blockquote class="reveal d1">This is where a client&rsquo;s actual words go, something specific about the launch, not a generic compliment.</blockquote>
@@ -403,8 +334,8 @@
   </section>
 
   <!-- OBJECTION -->
-  <div class="objection cut-top quote-block">
-    <div class="wrap reveal">
+  <div class="objection reveal">
+    <div class="wrap">
       <span class="eyebrow">The Honest Objection</span>
       <p>Going regional doesn&rsquo;t mean your brand comes out looking regional.</p>
     </div>
@@ -413,13 +344,13 @@
   <!-- FAQ -->
   <section class="faq" id="faq">
     <div class="wrap">
-      <div class="section-head reveal">
+      <div class="section-head snap">
         <p class="eyebrow">Before You Ask</p>
         <h2>Questions</h2>
       </div>
       <div class="faq-list">
 
-        <div class="faq-item reveal">
+        <div class="faq-item snap">
           <span class="faq-index">Scope</span>
           <details class="faq-body">
             <summary>What do you actually deliver?<span class="q-icon"></span></summary>
@@ -427,7 +358,7 @@
           </details>
         </div>
 
-        <div class="faq-item reveal">
+        <div class="faq-item snap">
           <span class="faq-index">Reach</span>
           <details class="faq-body">
             <summary>Which industries do you work with?<span class="q-icon"></span></summary>
@@ -435,7 +366,7 @@
           </details>
         </div>
 
-        <div class="faq-item reveal">
+        <div class="faq-item snap">
           <span class="faq-index">Timeline</span>
           <details class="faq-body">
             <summary>How long does a launch take?<span class="q-icon"></span></summary>
@@ -443,7 +374,7 @@
           </details>
         </div>
 
-        <div class="faq-item reveal">
+        <div class="faq-item snap">
           <span class="faq-index">Vs. Others</span>
           <details class="faq-body">
             <summary>How is this different from a global agency&rsquo;s regional office, or a local UAE agency?<span class="q-icon"></span></summary>
@@ -456,10 +387,10 @@
   </section>
 
   <!-- FINAL CTA -->
-  <div class="final cut-top quote-block">
+  <div class="final">
     <div class="wrap reveal">
       <h2>Regional Intelligence.<br>Global Standards.</h2>
-      <a class="stamp stamp-on-black magnetic" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
+      <a class="btn-ghost" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
         Start With What&rsquo;s Already Working
       </a>
     </div>
@@ -476,9 +407,12 @@
 
 <script>
 (function(){
-  document.documentElement.classList.add('js-ready');
+  var html = document.documentElement;
+  html.classList.add('js-ready');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var els = document.querySelectorAll('.reveal');
+  /* section / row reveals (two speeds) */
+  var els = document.querySelectorAll('.reveal, .snap, .word, .objection');
   if('IntersectionObserver' in window){
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
@@ -487,32 +421,73 @@
           io.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.15, rootMargin: '0px 0px -30px 0px' });
     els.forEach(function(el){ io.observe(el); });
   } else {
     els.forEach(function(el){ el.classList.add('in-view'); });
   }
 
+  /* stagger hero words individually, cheaply, via transition-delay */
+  document.querySelectorAll('.hero .word').forEach(function(el, i){
+    el.style.transitionDelay = (i * 0.09) + 's';
+  });
+
+  /* nav solidifies once you scroll past the hero */
   var onScroll = function(){
-    document.documentElement.classList.toggle('is-scrolled', window.scrollY > 40);
+    html.classList.toggle('is-scrolled', window.scrollY > window.innerHeight * 0.6);
   };
-  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('scroll', onScroll, { passive:true });
   onScroll();
 
-  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var canHover = window.matchMedia('(hover: hover)').matches;
-  if(!reduced && canHover){
-    document.querySelectorAll('.magnetic').forEach(function(el){
-      el.addEventListener('mousemove', function(e){
-        var r = el.getBoundingClientRect();
-        var x = (e.clientX - r.left - r.width/2) * 0.22;
-        var y = (e.clientY - r.top - r.height/2) * 0.3;
-        el.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(0deg)';
-      });
-      el.addEventListener('mouseleave', function(){
-        el.style.transform = '';
-      });
-    });
+  /* cinematic pinned type sequence — skipped entirely under reduced motion */
+  if(!reduced){
+    html.classList.add('cine-on');
+    var spacer = document.querySelector('.cine-spacer');
+    var eyebrow = document.querySelector('.cine-eyebrow');
+    var line1 = document.querySelector('.cine-line-1');
+    var line2 = document.querySelector('.cine-line-2');
+
+    if(spacer && eyebrow && line1 && line2){
+      var lerp = function(a, b, t){ return a + (b - a) * t; };
+      var band = function(p, from, to){
+        if(p <= from) return 0;
+        if(p >= to) return 1;
+        return (p - from) / (to - from);
+      };
+      var ticking = false;
+      var render = function(){
+        ticking = false;
+        var rect = spacer.getBoundingClientRect();
+        var vh = window.innerHeight;
+        var total = rect.height - vh;
+        var p = total > 0 ? Math.min(Math.max(-rect.top / total, 0), 1) : 0;
+
+        var eyeIn = band(p, 0, 0.08);
+        var eyeOut = band(p, 0.9, 1);
+        eyebrow.style.opacity = eyeIn * (1 - eyeOut);
+
+        var l1In = band(p, 0.08, 0.24);
+        var l1Out = band(p, 0.38, 0.48);
+        var l1 = l1In * (1 - l1Out);
+        line1.style.opacity = l1;
+        line1.style.transform = 'translateY(-50%) scale(' + lerp(0.94, 1, l1In) + ')';
+
+        var l2In = band(p, 0.5, 0.66);
+        var l2Out = band(p, 0.9, 1);
+        var l2 = l2In * (1 - l2Out);
+        line2.style.opacity = l2;
+        line2.style.transform = 'translateY(-50%) scale(' + lerp(0.94, 1, l2In) + ')';
+
+        line1.style.pointerEvents = l1 > 0.5 ? 'auto' : 'none';
+        line2.style.pointerEvents = l2 > 0.5 ? 'auto' : 'none';
+      };
+      var onCineScroll = function(){
+        if(!ticking){ ticking = true; requestAnimationFrame(render); }
+      };
+      window.addEventListener('scroll', onCineScroll, { passive:true });
+      window.addEventListener('resize', onCineScroll);
+      render();
+    }
   }
 })();
 </script>
