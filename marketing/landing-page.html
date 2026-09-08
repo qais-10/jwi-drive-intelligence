@@ -48,11 +48,12 @@
     --fs-caption: 0.74rem;
     --fs-body:    1.05rem;
     --fs-eyebrow: 0.76rem;
-    --fs-h3:      clamp(1.4rem, 1.15rem + 1vw, 1.9rem);
-    --fs-h2:      clamp(1.9rem, 1.5rem + 1.8vw, 2.7rem);
-    --fs-hero:    clamp(2.9rem, 1.3rem + 6.6vw, 6.4rem);
-    --fs-quote:   clamp(1.5rem, 1.05rem + 2vw, 2.6rem);
+    --fs-h3:      clamp(1.35rem, 1.1rem + 1vw, 1.75rem);
+    --fs-h2:      clamp(1.9rem, 1.5rem + 1.8vw, 2.6rem);
+    --fs-hero:    clamp(2.6rem, 1.2rem + 6vw, 5.6rem);
+    --fs-quote:   clamp(1.3rem, 1.05rem + 1vw, 1.7rem);
     --fs-cine:    clamp(1.6rem, 1.1rem + 2.4vw, 3rem);
+    --fs-obj:     clamp(2rem, 1.3rem + 3.4vw, 3.6rem);
 
     --space-2: 0.9rem;
     --space-3: 1.5rem;
@@ -61,8 +62,6 @@
     --space-6: 6rem;
 
     --max: 1180px;
-
-    /* two moods, on purpose: cinematic (slow, generous) and snappy (utility, precise) */
     --ease-slow: cubic-bezier(.22,.61,.36,1);
     --ease-snap: cubic-bezier(.16,1,.3,1);
   }
@@ -82,10 +81,7 @@
   .wrap{ max-width: var(--max); margin: 0 auto; padding-inline: 1.25rem; }
   @media (min-width: 640px){ .wrap{ padding-inline: 2.5rem; } }
 
-  .eyebrow{
-    font-family: var(--body); font-weight: 600; font-size: var(--fs-eyebrow);
-    text-transform: uppercase; letter-spacing: .16em;
-  }
+  .eyebrow{ font-family: var(--body); font-weight: 600; font-size: var(--fs-eyebrow); text-transform: uppercase; letter-spacing: .16em; }
   .caption{ font-family: var(--body); font-weight: 300; font-size: var(--fs-caption); letter-spacing: .04em; }
   .caps{ text-transform:uppercase; letter-spacing:.1em; }
 
@@ -96,7 +92,7 @@
   html.js-ready .reveal.in-view{ opacity:1; transform:none; }
   html.js-ready .snap{ opacity:0; transform: translateY(8px); transition: opacity .35s var(--ease-snap), transform .35s var(--ease-snap); }
   html.js-ready .snap.in-view{ opacity:1; transform:none; }
-  .d1{ transition-delay:.06s; } .d2{ transition-delay:.12s; } .d3{ transition-delay:.18s; }
+  .d1{ transition-delay:.08s; } .d2{ transition-delay:.16s; } .d3{ transition-delay:.24s; }
 
   @media (prefers-reduced-motion: reduce){
     html{ scroll-behavior:auto; }
@@ -104,7 +100,7 @@
     *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
   }
 
-  /* ---------- Ghost button: one consistent primary-action style ---------- */
+  /* ---------- Ghost button: one primary-action style, light + dark variants ---------- */
   .btn-ghost{
     display:inline-flex; align-items:center; gap:.6rem;
     font-family: var(--body); font-weight:600; font-size:.82rem;
@@ -114,102 +110,82 @@
     transition: background .3s var(--ease-snap), color .3s var(--ease-snap), transform .3s var(--ease-snap);
   }
   .btn-ghost:hover{ background: var(--beige); color: var(--black); transform: translateY(-2px); }
-  .btn-ghost:focus-visible{ outline:2px solid var(--beige); outline-offset:3px; }
+  .btn-ghost:focus-visible{ outline:2px solid currentColor; outline-offset:3px; }
   .btn-ghost-sm{ padding:.55rem .95rem; font-size:.7rem; }
+  .btn-ghost-dark{ border-color: var(--black); color: var(--black); }
+  .btn-ghost-dark:hover{ background: var(--black); color: var(--beige); }
 
-  /* ---------- Nav: blends into hero, solidifies on scroll ---------- */
-  .nav{
-    position: sticky; top:0; z-index: 50; background: transparent;
-    border-bottom: 1px solid transparent;
-    transition: background .4s var(--ease-snap), border-color .4s var(--ease-snap);
-  }
-  html.is-scrolled .nav{ background: var(--black); border-bottom-color: rgba(239,238,234,.14); }
-  .nav-inner{ display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-block:1.1rem; }
-  .brand{ text-decoration:none; color: var(--beige); font-family: var(--display); font-size:1.05rem; letter-spacing:.12em; }
-  .nav-links{ display:none; align-items:center; gap:2rem; font-family:var(--display); font-size:.78rem; letter-spacing:.12em; color: var(--beige); }
+  /* ---------- Nav: light utility bar, not a black brand bar ---------- */
+  .nav{ position: sticky; top:0; z-index: 50; background: var(--beige); border-bottom: 1px solid transparent; transition: border-color .4s var(--ease-snap); }
+  html.is-scrolled .nav{ border-bottom-color: rgba(20,20,20,.14); }
+  .nav-inner{ display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-block:1.05rem; }
+  .brand{ text-decoration:none; color: var(--black); font-family: var(--display); font-size:1.05rem; letter-spacing:.12em; }
+  .nav-links{ display:none; align-items:center; gap:2rem; font-family:var(--display); font-size:.78rem; letter-spacing:.12em; color: var(--black); }
   .nav-links a{ text-decoration:none; position:relative; padding-bottom:.2rem; }
-  .nav-links a::after{ content:""; position:absolute; left:0; right:100%; bottom:0; height:1px; background:var(--beige); transition:right .25s var(--ease-snap); }
+  .nav-links a::after{ content:""; position:absolute; left:0; right:100%; bottom:0; height:1px; background:var(--black); transition:right .25s var(--ease-snap); }
   .nav-links a:hover::after{ right:0; }
   @media (min-width:780px){ .nav-links{ display:flex; } }
 
-  /* ---------- Hero: restrained, centered, huge type, generous air ---------- */
-  .hero{ background: var(--black); color: var(--beige); text-align:center; }
-  .hero .wrap{ padding-block: clamp(5rem, 4rem + 7vw, 9rem); display:flex; flex-direction:column; align-items:center; gap: var(--space-5); }
-  .hero-eyebrow{ color: var(--beige); opacity:.6; }
-  .hero h1{
-    font-size: var(--fs-hero); line-height: 0.98; letter-spacing:-0.015em; text-transform:uppercase;
-    color: var(--beige); max-width: 15ch;
+  /* ---------- Masthead: white canvas, left-aligned, ink not block ---------- */
+  .masthead{ background: var(--white); color: var(--black); }
+  .masthead .wrap{ padding-block: clamp(4rem, 3.2rem + 5vw, 7.5rem); display:flex; flex-direction:column; align-items:flex-start; gap: var(--space-5); }
+  .masthead-eyebrow{ color: rgba(20,20,20,.55); }
+  .masthead h1{
+    font-size: var(--fs-hero); line-height: 1.0; letter-spacing:-0.01em; text-transform:uppercase;
+    color: var(--black); max-width: 17ch; text-align:left;
   }
-  .word{ display:inline-block; }
-  html.js-ready .word{ opacity:0; transform: translateY(.4em) scale(1.04); transition: opacity .7s var(--ease-snap), transform .7s var(--ease-snap); }
-  html.js-ready .word.in-view{ opacity:1; transform:none; }
 
-  /* ---------- Cinematic pinned sequence (JS-enhanced only; static by default) ---------- */
-  .cine{ background: var(--beige); }
+  /* ---------- Cinematic pinned sequence: the one black moment (JS-enhanced; static by default) ---------- */
+  .cine{ background: var(--black); color: var(--beige); }
   .cine-spacer{ position:relative; }
-  .cine-pin{
-    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
-    padding-block: clamp(4.5rem, 3.6rem + 4vw, 7rem); gap: var(--space-3);
-  }
-  .cine-eyebrow{ color: var(--black); opacity:.55; }
-  .cine-line{ font-family: var(--display); font-size: var(--fs-cine); line-height:1.32; color: var(--black); max-width: 30ch; }
+  .cine-pin{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding-block: clamp(4.5rem, 3.6rem + 4vw, 7rem); gap: var(--space-3); }
+  .cine-eyebrow{ color: var(--beige); opacity:.6; }
+  .cine-line{ font-family: var(--display); font-size: var(--fs-cine); line-height:1.32; color: var(--beige); max-width: 30ch; }
 
   html.cine-on .cine-spacer{ height: 260vh; }
   @media (max-width: 640px){ html.cine-on .cine-spacer{ height: 210vh; } }
-  html.cine-on .cine-pin{
-    position: sticky; top:0; height:100vh; padding-block:0; overflow:hidden;
-  }
+  html.cine-on .cine-pin{ position: sticky; top:0; height:100vh; padding-block:0; overflow:hidden; }
   html.cine-on .cine-eyebrow, html.cine-on .cine-line{ position:absolute; opacity:0; will-change: opacity, transform; }
   html.cine-on .cine-eyebrow{ top: 32%; }
   html.cine-on .cine-line{ top:50%; transform: translateY(-50%) scale(.94); }
 
-  /* ---------- Section rhythm: deliberate contrast, not uniform ---------- */
-  .benefits{ background: var(--black); color: var(--beige); padding-block: clamp(3.5rem, 3rem + 2.4vw, 5rem); }
-  .testimonial{ background: var(--beige); padding-block: clamp(5.5rem, 4.4rem + 5vw, 9rem); }
-  .objection{ background: var(--black); color: var(--beige); padding-block: clamp(3rem, 2.5rem + 2vw, 4.25rem); }
+  /* ---------- Section rhythm ---------- */
+  .index{ background: var(--beige); padding-block: clamp(4.5rem, 3.6rem + 3vw, 6.5rem); }
+  .testimonial{ background: var(--white); padding-block: clamp(4rem, 3.4rem + 3vw, 6rem); }
+  .objection{ background: var(--beige); padding-block: clamp(4.5rem, 3.6rem + 4vw, 7rem); }
   .faq{ background: var(--white); padding-block: clamp(4.5rem, 3.6rem + 3vw, 6.5rem); }
-  .final{ background: var(--black); color: var(--beige); padding-block: clamp(5.5rem, 4.4rem + 5vw, 9rem); }
+  .final{ background: var(--beige); padding-block: clamp(5rem, 4rem + 4.5vw, 8rem); }
 
-  .section-head{ margin-bottom: var(--space-5); max-width: 32rem; }
-  .section-head h2{ font-size: var(--fs-h2); line-height:1.06; letter-spacing:-0.008em; text-transform:uppercase; }
+  .section-head{ margin-bottom: var(--space-5); max-width: 34rem; }
+  .section-head h2{ font-size: var(--fs-h2); line-height:1.08; letter-spacing:-0.008em; text-transform:uppercase; }
   .section-head .eyebrow{ display:block; margin-bottom: var(--space-2); }
 
-  /* ---------- Benefits: alternating rows, snappy ---------- */
-  .benefits .section-head .eyebrow{ opacity:.6; }
-  .benefits .section-head h2{ color: var(--beige); }
-  .benefit-row{
-    display:flex; flex-direction:column; gap: var(--space-2);
-    padding-block: var(--space-4); border-top: 1px solid rgba(239,238,234,.16);
-  }
-  .benefit-row:last-child{ border-bottom: 1px solid rgba(239,238,234,.16); }
-  @media (min-width:780px){
-    .benefit-row{ flex-direction:row; justify-content:space-between; align-items:flex-start; gap: var(--space-6); }
-    .benefit-row:nth-child(even){ flex-direction:row-reverse; }
-  }
-  .benefit-mark{ flex:0 0 auto; display:flex; align-items:center; gap:.7rem; min-width:10.5rem; }
-  .check svg{ width:18px; height:18px; display:block; flex:none; }
-  .check path{ fill:none; stroke:var(--beige); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:0; }
+  /* ---------- Benefits as a contents index (folio + dotted leader + draw-on check) ---------- */
+  .idx-row{ display:flex; align-items:baseline; gap:.85rem; flex-wrap:wrap; padding-top: var(--space-4); }
+  .idx-num{ font-family:var(--body); font-weight:600; font-size:.82rem; color: rgba(20,20,20,.4); font-variant-numeric: tabular-nums; }
+  .idx-title{ font-family: var(--display); font-size: var(--fs-h3); color: var(--black); }
+  .idx-leader{ flex:1 1 6rem; min-width:2rem; align-self:center; height:0; border-bottom:2px dotted rgba(20,20,20,.32); margin-bottom:.4em; }
+  @media (max-width:480px){ .idx-leader{ display:none; } }
+  .idx-mark{ align-self:center; flex:none; }
+  .check svg{ width:18px; height:18px; display:block; }
+  .check path{ fill:none; stroke: var(--black); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:0; }
   html.js-ready .check path{ stroke-dashoffset:1; transition: stroke-dashoffset .5s var(--ease-snap) .1s; }
   html.js-ready .in-view .check path{ stroke-dashoffset:0; }
-  .benefit-copy{ max-width:32rem; }
-  .benefit-copy h3{ font-size: var(--fs-h3); color: var(--beige); margin-bottom: var(--space-2); line-height:1.15; }
-  .benefit-copy p{ color: rgba(239,238,234,.75); }
+  .idx-copy{ margin-top:.6rem; padding-bottom: var(--space-4); border-bottom: 1px solid rgba(20,20,20,.14); color: rgba(20,20,20,.72); max-width:36rem; }
+  .idx-row-wrap:last-child .idx-copy{ border-bottom:none; }
 
-  /* ---------- Testimonial: large, quiet, generous ---------- */
-  .testimonial .wrap{ max-width: 40rem; text-align:center; }
-  .testimonial blockquote{ margin:0; font-family:var(--display); font-size: var(--fs-quote); line-height:1.4; color: var(--black); }
-  .attrib{ margin-top: var(--space-4); }
+  /* ---------- Testimonial: marginal note, not a centered moment ---------- */
+  .testimonial .wrap{ max-width: 34rem; }
+  .testimonial-inner{ border-left: 2px solid var(--black); padding-left: var(--space-4); }
+  .testimonial blockquote{ margin:0; font-family:var(--display); font-size: var(--fs-quote); line-height:1.44; color: var(--black); text-align:left; }
+  .attrib{ margin-top: var(--space-3); }
   .flag{ margin-top: var(--space-2); color: rgba(20,20,20,.5); }
 
-  /* ---------- Objection: short, punchy, wipes into view ---------- */
-  .objection .wrap{ max-width: 38rem; text-align:center; }
-  .objection .eyebrow{ display:block; margin-bottom: var(--space-3); opacity:.6; }
-  .objection p{
-    font-family: var(--display); font-style:italic;
-    font-size: clamp(1.5rem, 1.15rem + 1.8vw, 2.3rem); line-height:1.28; color: var(--beige);
-    display:inline-block;
-  }
-  html.js-ready .objection p{ clip-path: inset(0 100% 0 0); transition: clip-path .9s var(--ease-slow) .1s; }
+  /* ---------- Objection: scale carries it, no color block, wipes into view ---------- */
+  .objection .wrap{ max-width: 46rem; }
+  .objection .eyebrow{ display:block; margin-bottom: var(--space-3); opacity:.55; }
+  .objection p{ font-family: var(--display); font-style:italic; font-size: var(--fs-obj); line-height:1.14; color: var(--black); display:inline-block; }
+  html.js-ready .objection p{ clip-path: inset(0 100% 0 0); transition: clip-path 1s var(--ease-slow) .1s; }
   html.js-ready .objection.in-view p{ clip-path: inset(0 0 0 0); }
 
   /* ---------- FAQ: indexed two-column, snappy expand ---------- */
@@ -227,14 +203,23 @@
   .faq-body[open] summary .q-icon::after{ transform: rotate(90deg); }
   .faq-body .faq-a{ padding-top: var(--space-2); max-width:40rem; color: rgba(20,20,20,.7); }
 
-  /* ---------- Final CTA: mirrors hero exactly ---------- */
-  .final .wrap{ padding-block:0; max-width:40rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap: var(--space-5); }
-  .final h2{ font-size: var(--fs-hero); line-height:0.98; letter-spacing:-0.015em; text-transform:uppercase; color: var(--beige); max-width:15ch; }
+  /* ---------- Final: a reply card, not another CTA band ---------- */
+  .final .wrap{ display:flex; justify-content:center; }
+  .card{
+    position:relative; background: var(--white); border: 1px solid var(--black);
+    padding: clamp(2.5rem, 2rem + 2.4vw, 3.75rem); max-width: 28rem; width:100%;
+    text-align:center; display:flex; flex-direction:column; align-items:center; gap: var(--space-4);
+  }
+  .card::before, .card::after{ content:""; position:absolute; width:13px; height:13px; border: 1px solid var(--black); }
+  .card::before{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
+  .card::after{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
+  .card h2{ font-size: var(--fs-h2); line-height:1.08; letter-spacing:-0.006em; text-transform:uppercase; color: var(--black); }
+  .card p{ color: rgba(20,20,20,.65); }
 
   /* ---------- Footer ---------- */
-  footer{ background: var(--beige); }
+  footer{ background: var(--white); border-top: 1px solid rgba(20,20,20,.12); }
   footer .wrap{ display:flex; flex-wrap:wrap; gap:.6rem 1.5rem; align-items:center; justify-content:space-between; padding-block: var(--space-3); }
-  footer .caption{ color: rgba(20,20,20,.55); }
+  footer .caption{ color: rgba(20,20,20,.5); }
 </style>
 </head>
 <body>
@@ -247,7 +232,7 @@
       <a href="#benefits">Benefits</a>
       <a href="#faq">FAQ</a>
     </div>
-    <a class="btn-ghost btn-ghost-sm" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
+    <a class="btn-ghost btn-ghost-dark btn-ghost-sm" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
       Start With What&rsquo;s Already Working
     </a>
   </div>
@@ -255,21 +240,18 @@
 
 <main id="top">
 
-  <!-- HERO -->
-  <header class="hero">
+  <!-- MASTHEAD -->
+  <header class="masthead">
     <div class="wrap">
-      <span class="eyebrow hero-eyebrow reveal">UAE Market Entry</span>
-      <h1>
-        <span class="word">Regional</span> <span class="word">Intelligence.</span><br>
-        <span class="word">Global</span> <span class="word">Standards.</span>
-      </h1>
-      <a class="btn-ghost reveal d2" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
+      <span class="eyebrow masthead-eyebrow reveal">UAE Market Entry</span>
+      <h1 class="reveal d1">Regional Intelligence.<br>Global Standards.</h1>
+      <a class="btn-ghost btn-ghost-dark reveal d2" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
         Start With What&rsquo;s Already Working
       </a>
     </div>
   </header>
 
-  <!-- PROMISE — cinematic pinned type sequence -->
+  <!-- PROMISE — the one black spread, scroll-pinned -->
   <section class="cine" id="how-it-works">
     <div class="cine-spacer">
       <div class="cine-pin">
@@ -280,56 +262,55 @@
     </div>
   </section>
 
-  <!-- BENEFITS -->
-  <section class="benefits" id="benefits">
+  <!-- BENEFITS — contents index -->
+  <section class="index" id="benefits">
     <div class="wrap">
       <div class="section-head snap">
-        <p class="eyebrow">What Changes</p>
-        <h2>Three Things Change The Moment We Start</h2>
+        <p class="eyebrow">Contents</p>
+        <h2>What Changes The Moment We Start</h2>
       </div>
 
-      <div class="benefit-row snap">
-        <div class="benefit-mark">
-          <span class="check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
-          <span class="eyebrow">On Brand</span>
+      <div class="idx-row-wrap">
+        <div class="idx-row snap">
+          <span class="idx-num">01</span>
+          <span class="idx-title">Your Brand Stays Your Brand</span>
+          <span class="idx-leader"></span>
+          <span class="idx-mark check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
         </div>
-        <div class="benefit-copy">
-          <h3>Your Brand Stays Your Brand</h3>
-          <p>Your brand launches in the UAE as itself, not diluted into a generic &ldquo;local version&rdquo; that undercuts what made it work in the first place.</p>
-        </div>
+        <p class="idx-copy snap">Your brand launches in the UAE as itself, not diluted into a generic &ldquo;local version&rdquo; that undercuts what made it work in the first place.</p>
       </div>
 
-      <div class="benefit-row snap d1">
-        <div class="benefit-mark">
-          <span class="check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
-          <span class="eyebrow">On Time</span>
+      <div class="idx-row-wrap">
+        <div class="idx-row snap d1">
+          <span class="idx-num">02</span>
+          <span class="idx-title">No Onboarding Tax</span>
+          <span class="idx-leader"></span>
+          <span class="idx-mark check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
         </div>
-        <div class="benefit-copy">
-          <h3>No Onboarding Tax</h3>
-          <p>You skip the weeks most brands lose briefing a new agency on tone, context, and what not to say. We already know where the lines are here.</p>
-        </div>
+        <p class="idx-copy snap d1">You skip the weeks most brands lose briefing a new agency on tone, context, and what not to say. We already know where the lines are here.</p>
       </div>
 
-      <div class="benefit-row snap d2">
-        <div class="benefit-mark">
-          <span class="check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
-          <span class="eyebrow">On Standard</span>
+      <div class="idx-row-wrap">
+        <div class="idx-row snap d2">
+          <span class="idx-num">03</span>
+          <span class="idx-title">No Downgraded Standard</span>
+          <span class="idx-leader"></span>
+          <span class="idx-mark check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" pathLength="1"/></svg></span>
         </div>
-        <div class="benefit-copy">
-          <h3>No Downgraded Standard</h3>
-          <p>Your creative goes to market at the same production level as your global campaigns, because it&rsquo;s built by people who work at that level, not scaled down for a &ldquo;regional job.&rdquo;</p>
-        </div>
+        <p class="idx-copy snap d2">Your creative goes to market at the same production level as your global campaigns, because it&rsquo;s built by people who work at that level, not scaled down for a &ldquo;regional job.&rdquo;</p>
       </div>
     </div>
   </section>
 
-  <!-- TESTIMONIAL -->
+  <!-- TESTIMONIAL — marginal note -->
   <section class="testimonial">
     <div class="wrap">
-      <p class="eyebrow reveal">From The Field</p>
-      <blockquote class="reveal d1">This is where a client&rsquo;s actual words go, something specific about the launch, not a generic compliment.</blockquote>
-      <p class="attrib caption caps reveal d2">Name, Title &middot; Company</p>
-      <p class="flag caption reveal d2">Placeholder &middot; swap in a real client quote before this page goes live.</p>
+      <div class="testimonial-inner">
+        <p class="eyebrow reveal">From The Field</p>
+        <blockquote class="reveal d1">This is where a client&rsquo;s actual words go, something specific about the launch, not a generic compliment.</blockquote>
+        <p class="attrib caption caps reveal d2">Name, Title &middot; Company</p>
+        <p class="flag caption reveal d2">Placeholder &middot; swap in a real client quote before this page goes live.</p>
+      </div>
     </div>
   </section>
 
@@ -386,13 +367,17 @@
     </div>
   </section>
 
-  <!-- FINAL CTA -->
+  <!-- FINAL — reply card -->
   <div class="final">
-    <div class="wrap reveal">
-      <h2>Regional Intelligence.<br>Global Standards.</h2>
-      <a class="btn-ghost" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
-        Start With What&rsquo;s Already Working
-      </a>
+    <div class="wrap">
+      <div class="card reveal">
+        <span class="eyebrow">Next Step</span>
+        <h2>Regional Intelligence.<br>Global Standards.</h2>
+        <p>Bring the market you don&rsquo;t know yet. We bring the work that already runs in it.</p>
+        <a class="btn-ghost btn-ghost-dark" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
+          Start With What&rsquo;s Already Working
+        </a>
+      </div>
     </div>
   </div>
 
@@ -411,8 +396,7 @@
   html.classList.add('js-ready');
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* section / row reveals (two speeds) */
-  var els = document.querySelectorAll('.reveal, .snap, .word, .objection');
+  var els = document.querySelectorAll('.reveal, .snap, .objection');
   if('IntersectionObserver' in window){
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
@@ -427,14 +411,8 @@
     els.forEach(function(el){ el.classList.add('in-view'); });
   }
 
-  /* stagger hero words individually, cheaply, via transition-delay */
-  document.querySelectorAll('.hero .word').forEach(function(el, i){
-    el.style.transitionDelay = (i * 0.09) + 's';
-  });
-
-  /* nav solidifies once you scroll past the hero */
   var onScroll = function(){
-    html.classList.toggle('is-scrolled', window.scrollY > window.innerHeight * 0.6);
+    html.classList.toggle('is-scrolled', window.scrollY > 20);
   };
   window.addEventListener('scroll', onScroll, { passive:true });
   onScroll();
