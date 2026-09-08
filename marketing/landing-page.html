@@ -215,6 +215,25 @@
   .card::after{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
   .card h2{ font-size: var(--fs-h2); line-height:1.08; letter-spacing:-0.006em; text-transform:uppercase; color: var(--black); }
   .card p{ color: rgba(20,20,20,.65); }
+  .card-body{ display:flex; flex-direction:column; align-items:center; gap: var(--space-4); width:100%; }
+
+  /* ---------- Lead form: underline field, one email, one honeypot ---------- */
+  .lead-form{ display:flex; flex-direction:column; align-items:stretch; gap: var(--space-3); width:100%; }
+  .lead-field{ text-align:left; }
+  .lead-field label{ display:block; margin-bottom:.5rem; color: rgba(20,20,20,.55); }
+  .lead-field input[type="email"]{
+    width:100%; border:none; border-bottom:1px solid var(--black); background:transparent;
+    font-family:var(--body); font-size:1rem; color:var(--black); padding:.6rem 0;
+    outline:none; transition: border-color .3s var(--ease-snap), border-width .3s var(--ease-snap);
+  }
+  .lead-field input[type="email"]:focus{ border-bottom-width:2px; }
+  .lead-field input[type="email"]::placeholder{ color: rgba(20,20,20,.32); }
+  .lead-field input:invalid{ box-shadow:none; } /* rely on our own message, not the browser's red glow */
+  .hp-field{ position:absolute; width:1px; height:1px; left:-9999px; overflow:hidden; opacity:0; }
+  .form-status{ font-family:var(--body); font-size:.85rem; min-height:1.2em; margin:0; color: rgba(20,20,20,.7); }
+  .form-status.is-error{ font-weight:600; }
+  .btn-ghost:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
+  .card-thanks{ display:flex; flex-direction:column; align-items:center; gap: var(--space-3); }
 
   /* ---------- Footer ---------- */
   footer{ background: var(--white); border-top: 1px solid rgba(20,20,20,.12); }
@@ -232,7 +251,7 @@
       <a href="#benefits">Benefits</a>
       <a href="#faq">FAQ</a>
     </div>
-    <a class="btn-ghost btn-ghost-dark btn-ghost-sm" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
+    <a class="btn-ghost btn-ghost-dark btn-ghost-sm" href="#lead-form">
       Start With What&rsquo;s Already Working
     </a>
   </div>
@@ -244,7 +263,7 @@
   <header class="masthead">
     <div class="wrap">
       <h1 class="reveal">Regional Intelligence.<br>Global Standards.</h1>
-      <a class="btn-ghost btn-ghost-dark reveal d1" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
+      <a class="btn-ghost btn-ghost-dark reveal d1" href="#lead-form">
         Start With What&rsquo;s Already Working
       </a>
     </div>
@@ -366,16 +385,43 @@
     </div>
   </section>
 
-  <!-- FINAL — reply card -->
-  <div class="final">
+  <!-- FINAL — reply card, now the actual lead form -->
+  <div class="final" id="lead-form">
     <div class="wrap">
       <div class="card reveal">
-        <span class="eyebrow">Next Step</span>
-        <h2>Regional Intelligence.<br>Global Standards.</h2>
-        <p>Bring the market you don&rsquo;t know yet. We bring the work that already runs in it.</p>
-        <a class="btn-ghost btn-ghost-dark" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
-          Start With What&rsquo;s Already Working
-        </a>
+        <div class="card-body">
+          <span class="eyebrow">Next Step</span>
+          <h2>Regional Intelligence.<br>Global Standards.</h2>
+          <p>Bring the market you don&rsquo;t know yet. We bring the work that already runs in it.</p>
+
+          <form
+            class="lead-form"
+            action="https://formsubmit.co/admin@jwi-global.com"
+            data-ajax-action="https://formsubmit.co/ajax/admin@jwi-global.com"
+            method="POST"
+          >
+            <input type="hidden" name="_subject" value="New UAE launch lead &mdash; JWI site">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_template" value="table">
+
+            <div class="lead-field">
+              <label for="lead-email" class="eyebrow">Email</label>
+              <input type="email" id="lead-email" name="email" placeholder="you@brand.com" autocomplete="email" required>
+            </div>
+
+            <!-- honeypot: hidden from real visitors and screen readers; an unrecognized field
+                 name on purpose so browser autofill won't populate it and false-flag a real
+                 human as a bot -->
+            <div class="hp-field" aria-hidden="true">
+              <input type="text" id="lead-hp" name="hp_field" tabindex="-1" autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn-ghost btn-ghost-dark">
+              Start With What&rsquo;s Already Working
+            </button>
+            <p class="form-status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -464,6 +510,69 @@
       window.addEventListener('resize', onCineScroll);
       render();
     }
+  }
+
+  /* lead form: progressive enhancement over a plain HTML POST fallback */
+  var leadForm = document.querySelector('.lead-form');
+  if(leadForm){
+    var emailInput = leadForm.querySelector('#lead-email');
+    var honeyInput = leadForm.querySelector('#lead-hp');
+    var statusEl = leadForm.querySelector('.form-status');
+    var submitBtn = leadForm.querySelector('button[type="submit"]');
+    var ajaxAction = leadForm.getAttribute('data-ajax-action');
+
+    var setStatus = function(msg, isError){
+      statusEl.textContent = msg;
+      statusEl.classList.toggle('is-error', !!isError);
+    };
+
+    var showThanks = function(){
+      var body = leadForm.closest('.card-body');
+      body.innerHTML =
+        '<span class="eyebrow">Thank You</span>' +
+        '<div class="card-thanks">' +
+          '<h2>Check Your Inbox</h2>' +
+          '<p>We’ve got your details — expect to hear from us shortly.</p>' +
+        '</div>';
+    };
+
+    leadForm.addEventListener('submit', function(e){
+      e.preventDefault();
+
+      /* honeypot tripped: pretend success, send nothing */
+      if(honeyInput && honeyInput.value){
+        showThanks();
+        return;
+      }
+
+      var emailVal = (emailInput.value || '').trim();
+      var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
+      if(!emailOk){
+        setStatus('Please enter a valid email address.', true);
+        emailInput.focus();
+        return;
+      }
+
+      submitBtn.disabled = true;
+      var originalLabel = submitBtn.textContent;
+      submitBtn.textContent = 'Sending…';
+      setStatus('');
+
+      fetch(ajaxAction, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: new FormData(leadForm)
+      }).then(function(res){
+        if(!res.ok) throw new Error('bad response');
+        return res.json();
+      }).then(function(){
+        showThanks();
+      }).catch(function(){
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalLabel;
+        setStatus('Something went wrong — please try again, or email admin@jwi-global.com directly.', true);
+      });
+    });
   }
 })();
 </script>
