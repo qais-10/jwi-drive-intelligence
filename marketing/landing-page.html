@@ -51,8 +51,8 @@
     --fs-eyebrow: 0.78rem;
     --fs-col-h:   clamp(1.35rem, 1.15rem + 0.8vw, 1.75rem);
     --fs-h2:      clamp(1.9rem, 1.5rem + 1.8vw, 2.7rem);
-    --fs-hero:    clamp(2.3rem, 1.5rem + 3.6vw, 4.4rem);
-    --fs-quote:   clamp(1.35rem, 1.05rem + 1.3vw, 2rem);
+    --fs-hero:    clamp(2.75rem, 1.1rem + 7.4vw, 7rem);
+    --fs-quote:   clamp(1.4rem, 1.05rem + 1.6vw, 2.35rem);
 
     --space-1: 0.5rem;
     --space-2: 0.9rem;
@@ -178,32 +178,45 @@
     background: var(--black);
     color: var(--beige);
     text-align: center;
-    padding-block: clamp(4rem, 3rem + 6vw, 7.5rem);
+    padding-block: clamp(5rem, 3rem + 9vw, 9.5rem);
   }
   .hero h1{
     font-size: var(--fs-hero);
-    line-height: 1.14;
+    line-height: 0.98;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
     color: var(--beige);
-    max-width: 16ch;
+    max-width: 15ch;
     margin-inline: auto;
   }
-  .hero .btn{ margin-top: var(--space-5); }
+  .hero .btn{ margin-top: var(--space-6); }
 
-  /* ---------- Section rhythm ---------- */
-  section{ padding-block: clamp(4rem, 3rem + 3.4vw, 6.5rem); }
+  /* ---------- Section rhythm (varied on purpose, not uniform stacking) ---------- */
+  section{ padding-block: clamp(4.5rem, 3.4rem + 3.8vw, 7.5rem); }
+  .promise{ padding-block: clamp(3.5rem, 2.8rem + 2.8vw, 5.5rem); }
+  .testimonial{ padding-block: clamp(5rem, 3.8rem + 4.6vw, 8.5rem); }
   .section-head{ text-align:center; margin-bottom: var(--space-5); }
-  .section-head h2{ font-size: var(--fs-h2); }
+  .section-head h2{
+    font-size: var(--fs-h2); line-height:1.08; letter-spacing:-0.008em; text-transform:uppercase;
+  }
   .section-head .eyebrow{ display:block; margin-bottom: var(--space-2); }
 
   /* ---------- Promise (beige, pull-quote motif) ---------- */
   .promise{ background: var(--beige); text-align:center; }
-  .promise .wrap{ max-width: 44rem; }
-  .parens{ display:inline; }
-  .parens .p{ font-family: var(--display); font-size: 1.4em; color: var(--black); opacity:.55; }
+  .promise .wrap{ max-width: 46rem; }
+  .p{
+    font-family: var(--display);
+    font-size: 2.6em;
+    line-height: 0;
+    color: var(--black);
+    opacity: .38;
+    display: inline-block;
+    vertical-align: -0.16em;
+  }
   .promise p{
     font-family: var(--display);
     font-size: var(--fs-quote);
-    line-height: 1.48;
+    line-height: 1.46;
     color: var(--black);
   }
   .promise p + p{ margin-top: var(--space-3); }
@@ -217,26 +230,23 @@
   }
   @media (min-width: 860px){
     .col-grid{ grid-template-columns: repeat(3, 1fr); }
+    .col{ padding-left: var(--space-4); border-left: 1px solid rgba(239,238,234,.22); }
+    .col:first-child{ padding-left:0; border-left:none; }
   }
   .col{ text-align:left; }
-  .check{
-    width: 2.2rem; height: 2.2rem; border-radius: 50%;
-    border: 1px solid rgba(239,238,234,.4);
-    display:flex; align-items:center; justify-content:center;
-    margin-bottom: var(--space-3);
-  }
-  .check svg{ width: 16px; height:16px; }
+  .check{ margin-bottom: var(--space-4); display:block; }
+  .check svg{ width: 22px; height:22px; display:block; }
   .check path{
-    fill:none; stroke: var(--beige); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+    fill:none; stroke: var(--beige); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
     stroke-dasharray: 1; stroke-dashoffset: 0;
   }
   html.js-ready .check path{ stroke-dashoffset: 1; transition: stroke-dashoffset .8s var(--ease) .2s; }
   html.js-ready .in-view .check path{ stroke-dashoffset: 0; }
-  .col .eyebrow{ display:block; margin-bottom: var(--space-1); opacity:.6; }
+  .col .eyebrow{ display:block; margin-bottom: var(--space-2); opacity:.55; }
   .col h3{
-    font-size: var(--fs-col-h); color: var(--beige); margin-bottom: var(--space-2);
+    font-size: var(--fs-col-h); line-height:1.18; color: var(--beige); margin-bottom: var(--space-3);
   }
-  .col p{ color: rgba(239,238,234,.78); max-width: 32ch; }
+  .col p{ color: rgba(239,238,234,.72); max-width: 32ch; }
 
   /* ---------- Testimonial (beige, pull-quote motif) ---------- */
   .testimonial{ background: var(--beige); text-align:center; }
@@ -254,9 +264,11 @@
   .objection{ background: var(--black); color: var(--beige); text-align:center; }
   .objection .wrap{ max-width: 42rem; }
   .objection p{
-    font-family: var(--display); font-size: clamp(1.5rem, 1.15rem + 1.8vw, 2.35rem);
+    font-family: var(--display); font-style: italic;
+    font-size: clamp(1.5rem, 1.15rem + 1.8vw, 2.35rem);
     line-height: 1.32; color: var(--beige);
   }
+  .objection .p{ color: var(--beige); }
   .objection .eyebrow{ display:block; margin-bottom: var(--space-3); }
 
   /* ---------- FAQ (white, hairline dividers) ---------- */
@@ -290,16 +302,19 @@
   /* ---------- Final CTA (black, bookends hero) ---------- */
   .final{ background: var(--black); color: var(--beige); text-align:center; }
   .final .wrap{ max-width: 40rem; }
-  .final h2{ font-size: var(--fs-h2); color: var(--beige); margin-bottom: var(--space-4); }
+  .final h2{
+    font-size: var(--fs-h2); line-height: 1.04; letter-spacing: -0.01em;
+    text-transform: uppercase; color: var(--beige); margin-bottom: var(--space-5);
+  }
   .final .btn{ margin-top: 0; }
 
-  /* ---------- Footer (black bar) ---------- */
-  footer{ background: var(--black); }
+  /* ---------- Footer (beige — closes the page after the final black CTA) ---------- */
+  footer{ background: var(--beige); }
   footer .wrap{
     display:flex; flex-wrap:wrap; gap: .6rem 1.5rem; align-items:center; justify-content:space-between;
     padding-block: var(--space-3);
   }
-  footer .caption{ color: rgba(239,238,234,.55); }
+  footer .caption{ color: rgba(20,20,20,.55); }
 </style>
 </head>
 <body>
@@ -323,7 +338,7 @@
   <!-- HERO -->
   <header class="hero">
     <div class="wrap">
-      <h1 class="caps reveal">Regional Intelligence.<br>Global Standards.</h1>
+      <h1 class="reveal">Regional Intelligence.<br>Global Standards.</h1>
       <a class="btn reveal reveal-1" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
         Start With What&rsquo;s Already Working
       </a>
@@ -334,12 +349,8 @@
   <section class="promise" id="how-it-works">
     <div class="wrap">
       <p class="eyebrow reveal">How It Works</p>
-      <p class="reveal reveal-1">
-        <span class="parens"><span class="p">(</span>We build UAE campaigns from work that&rsquo;s already run here, not from a first guess made on your account.</span>
-      </p>
-      <p class="reveal reveal-2">
-        Whatever industry you&rsquo;re in, what launches still looks and sounds like your brand, not a &ldquo;localized&rdquo; version of it.<span class="parens"><span class="p">)</span></span>
-      </p>
+      <p class="reveal reveal-1"><span class="p">(</span>We build UAE campaigns from work that&rsquo;s already run here, not from a first guess made on your account.</p>
+      <p class="reveal reveal-2">Whatever industry you&rsquo;re in, what launches still looks and sounds like your brand, not a &ldquo;localized&rdquo; version of it.<span class="p">)</span></p>
     </div>
   </section>
 
@@ -381,9 +392,7 @@
   <section class="testimonial">
     <div class="wrap">
       <p class="eyebrow reveal">From The Field</p>
-      <blockquote class="reveal reveal-1">
-        <span class="p">(</span>This is where a client&rsquo;s actual words go, something specific about the launch, not a generic compliment.<span class="p">)</span>
-      </blockquote>
+      <blockquote class="reveal reveal-1"><span class="p">(</span>This is where a client&rsquo;s actual words go, something specific about the launch, not a generic compliment.<span class="p">)</span></blockquote>
       <p class="attrib caption caps reveal reveal-2">Name, Title &middot; Company</p>
       <p class="flag caption reveal reveal-2">Placeholder &middot; swap in a real client quote before this page goes live.</p>
     </div>
@@ -433,7 +442,7 @@
   <!-- FINAL CTA -->
   <div class="final">
     <div class="wrap reveal">
-      <h2 class="caps">Regional Intelligence.<br>Global Standards.</h2>
+      <h2>Regional Intelligence.<br>Global Standards.</h2>
       <a class="btn" href="mailto:hello@jwi-global.com?subject=UAE%20launch">
         Start With What&rsquo;s Already Working
       </a>
