@@ -443,7 +443,10 @@
   }
 
   function spawnPowerup() {
-    powerup = { x: W + 40, y: GROUND_Y - player.h * 0.55, r: 16, phase: 0 };
+    const maxJumpHeight = (JUMP_VELOCITY * JUMP_VELOCITY) / (2 * GRAVITY);
+    const floorY = GROUND_Y - player.h;
+    const y = floorY - maxJumpHeight * (0.5 + Math.random() * 0.2);
+    powerup = { x: W + 40, y, r: 13, phase: 0 };
   }
 
   function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
@@ -542,6 +545,7 @@
     if (milestone > lastMilestone && !powerup) {
       lastMilestone = milestone;
       spawnPowerup();
+      showToast('Jump For Shield');
     }
 
     for (const o of obstacles) o.x -= speed * dt;
