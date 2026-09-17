@@ -88,11 +88,16 @@
   }
   .iconbtn:hover { background: var(--black); color: var(--beige); }
   .iconbtn:active { transform: scale(0.92); }
-  #shieldIndicator {
+  #powerupBar {
     position: absolute;
     top: 18px;
     left: 50%;
     transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .badge {
     background: var(--black);
     color: var(--beige);
     font-family: var(--font-body);
@@ -103,10 +108,11 @@
     padding: 6px 14px;
     border-radius: 999px;
     opacity: 0;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
+    transform: translateY(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
   }
-  #shieldIndicator.show { opacity: 1; }
+  .badge.show { opacity: 1; transform: translateY(0); }
   #toast {
     position: absolute;
     top: 36%;
@@ -170,6 +176,16 @@
     color: var(--beige);
     opacity: 0.7;
   }
+  .legend {
+    margin: 0;
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--beige);
+    opacity: 0.45;
+  }
   .stat-row { display: flex; gap: 30px; font-family: var(--font-body); }
   .stat-row .num {
     display: block;
@@ -226,7 +242,11 @@
     </div>
   </div>
 
-  <div id="shieldIndicator">Shield</div>
+  <div id="powerupBar">
+    <div class="badge" id="shieldBadge">Shield</div>
+    <div class="badge" id="multiplierBadge">Score x2</div>
+    <div class="badge" id="doubleBadge">Double Jump</div>
+  </div>
   <div id="toast"></div>
 
   <div id="overlay" class="overlay-panel">
@@ -247,6 +267,7 @@
     <canvas id="titleRunner" width="96" height="96" aria-hidden="true"></canvas>
     <h1 class="headline">Runner</h1>
     <p class="sub">Tap &middot; Click &middot; Space To Run</p>
+    <p class="legend">Every 100m &middot; Shield &middot; 2&times; Score &middot; Double Jump</p>
     <div class="stat-row">
       <div><span class="num" id="startBest">0</span><span class="cap">High Score</span></div>
     </div>
@@ -272,7 +293,11 @@
   const shareBtnHud = document.getElementById('shareBtnHud');
   const shareBtnStart = document.getElementById('shareBtnStart');
   const shareBtnOver = document.getElementById('shareBtnOver');
-  const shieldIndicator = document.getElementById('shieldIndicator');
+  const badges = {
+    shield: document.getElementById('shieldBadge'),
+    multiplier: document.getElementById('multiplierBadge'),
+    double: document.getElementById('doubleBadge'),
+  };
   const toastEl = document.getElementById('toast');
   const titleRunnerCanvas = document.getElementById('titleRunner');
   const titleRunnerCtx = titleRunnerCanvas.getContext('2d');
@@ -300,11 +325,24 @@
   const BASE_SPEED = 340;
   const MAX_SPEED = 820;
   const SPEED_RAMP = 6.5;
-  const SHIELD_DURATION = 5;
   const SHAKE_DURATION = 0.18;
   const MILESTONE_DISTANCE = 100;
 
-  const player = { x: 0, y: 0, w: 34, h: 46, vy: 0, onGround: true, squash: 1, legPhase: 0 };
+  const POWERUP_TYPES = ['shield', 'multiplier', 'double'];
+  const POWERUP_DURATION = { shield: 5, multiplier: 6, double: 8 };
+  const POWERUP_LABEL = { shield: 'Shield', multiplier: 'Score x2', double: 'Double Jump' };
+  const POWERUP_SPAWN_TOAST = {
+    shield: 'Jump For Shield',
+    multiplier: 'Jump For 2x Score',
+    double: 'Jump For Double Jump',
+  };
+  const POWERUP_PICKUP_TOAST = {
+    shield: 'Shield Acquired',
+    multiplier: '2x Score Acquired',
+    double: 'Double Jump Acquired',
+  };
+
+  const player = { x: 0, y: 0, w: 34, h: 46, vy: 0, onGround: true, squash: 1, legPhase: 0, extraJumpUsed: false };
 
   let obstacles = [], gaps = [], particles = [], streaks = [];
   let skylineOffset = 0;
@@ -316,8 +354,11 @@
   let elapsed = 0;
   let lastMilestone = 0;
   let powerup = null;
-  let shieldActive = false;
-  let shieldTimeLeft = 0;
+  const effects = {
+    shield: { active: false, timeLeft: 0 },
+    multiplier: { active: false, timeLeft: 0 },
+    double: { active: false, timeLeft: 0 },
+  };
   let streakTimer = 0;
 
   let best = 0;
@@ -351,6 +392,7 @@
     player.onGround = true;
     player.squash = 1;
     player.legPhase = 0;
+    player.extraJumpUsed = false;
     obstacles = []; gaps = []; particles = []; streaks = [];
     speed = BASE_SPEED;
     distance = 0;
@@ -359,12 +401,14 @@
     nextObstacleAt = 1.1;
     lastMilestone = 0;
     powerup = null;
-    shieldActive = false;
-    shieldTimeLeft = 0;
     streakTimer = 0;
     shakeTime = 0;
     scoreEl.textContent = '0';
-    shieldIndicator.classList.remove('show');
+    for (const key of POWERUP_TYPES) {
+      effects[key].active = false;
+      effects[key].timeLeft = 0;
+      badges[key].classList.remove('show');
+    }
   }
 
   function startGame() {
@@ -403,6 +447,11 @@
       player.vy = JUMP_VELOCITY;
       player.onGround = false;
       player.squash = 1;
+      player.extraJumpUsed = false;
+      spawnDust();
+    } else if (effects.double.active && !player.extraJumpUsed) {
+      player.vy = JUMP_VELOCITY * 0.85;
+      player.extraJumpUsed = true;
       spawnDust();
     }
   }
@@ -446,7 +495,9 @@
     const maxJumpHeight = (JUMP_VELOCITY * JUMP_VELOCITY) / (2 * GRAVITY);
     const floorY = GROUND_Y - player.h;
     const y = floorY - maxJumpHeight * (0.5 + Math.random() * 0.2);
-    powerup = { x: W + 40, y, r: 13, phase: 0 };
+    const type = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+    powerup = { x: W + 40, y, r: 13, phase: 0, type };
+    showToast(POWERUP_SPAWN_TOAST[type]);
   }
 
   function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
@@ -491,7 +542,7 @@
   function update(dt) {
     elapsed += dt;
     speed = Math.min(MAX_SPEED, BASE_SPEED + elapsed * SPEED_RAMP);
-    distance += speed * dt * 0.05;
+    distance += speed * dt * 0.05 * (effects.multiplier.active ? 2 : 1);
     scoreEl.textContent = Math.floor(distance);
 
     groundOffset = (groundOffset + speed * dt) % 40;
@@ -508,28 +559,31 @@
     }
 
     const floorY = GROUND_Y - player.h;
-    const groundLock = (!overGap || shieldActive);
+    const groundLock = (!overGap || effects.shield.active);
     if (groundLock && player.y >= floorY) {
       if (!player.onGround) player.squash = 1.25;
       player.y = floorY;
       player.vy = 0;
       player.onGround = true;
+      player.extraJumpUsed = false;
     } else {
       player.onGround = false;
     }
     player.squash += (1 - player.squash) * Math.min(1, dt * 10);
 
-    if (!shieldActive) {
+    if (!effects.shield.active) {
       if (overGap && player.y >= floorY) { triggerDeath(); return; }
       if (player.y > H + 100) { triggerDeath(); return; }
     }
 
-    if (shieldActive) {
-      shieldTimeLeft -= dt;
-      shieldIndicator.textContent = 'Shield ' + Math.max(0, Math.ceil(shieldTimeLeft)) + 's';
-      if (shieldTimeLeft <= 0) {
-        shieldActive = false;
-        shieldIndicator.classList.remove('show');
+    for (const key of POWERUP_TYPES) {
+      const e = effects[key];
+      if (!e.active) continue;
+      e.timeLeft -= dt;
+      badges[key].textContent = POWERUP_LABEL[key] + ' ' + Math.max(0, Math.ceil(e.timeLeft)) + 's';
+      if (e.timeLeft <= 0) {
+        e.active = false;
+        badges[key].classList.remove('show');
       }
     }
 
@@ -545,7 +599,6 @@
     if (milestone > lastMilestone && !powerup) {
       lastMilestone = milestone;
       spawnPowerup();
-      showToast('Jump For Shield');
     }
 
     for (const o of obstacles) o.x -= speed * dt;
@@ -558,18 +611,19 @@
       powerup.phase += dt;
       const px = player.x, pw = player.w, py = player.y, ph = player.h;
       if (rectsOverlap(px, py, pw, ph, powerup.x - powerup.r, powerup.y - powerup.r, powerup.r * 2, powerup.r * 2)) {
-        shieldActive = true;
-        shieldTimeLeft = SHIELD_DURATION;
-        shieldIndicator.classList.add('show');
+        const type = powerup.type;
+        effects[type].active = true;
+        effects[type].timeLeft = POWERUP_DURATION[type];
+        badges[type].classList.add('show');
         spawnBurst(powerup.x, powerup.y);
-        showToast('Shield Acquired');
+        showToast(POWERUP_PICKUP_TOAST[type]);
         powerup = null;
       } else if (powerup.x < -40) {
         powerup = null;
       }
     }
 
-    if (!shieldActive) {
+    if (!effects.shield.active) {
       for (const o of obstacles) {
         const px = player.x + 4, pw = player.w - 8, py = player.y + 4, ph = player.h - 6;
         if (rectsOverlap(px, py, pw, ph, o.x, o.y, o.w, o.h)) { triggerDeath(); return; }
@@ -642,12 +696,26 @@
     c.restore();
   }
 
+  function drawChevron(cx, cy, size) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.beginPath();
+    ctx.moveTo(-size / 2, size * 0.32);
+    ctx.lineTo(0, -size * 0.32);
+    ctx.lineTo(size / 2, size * 0.32);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#141414';
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function drawPowerup(p) {
     const bob = Math.sin(p.phase * 3) * 4;
     const cx = p.x, cy = p.y + bob;
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(p.phase * 0.9);
     ctx.beginPath();
     ctx.arc(0, 0, p.r, 0, Math.PI * 2);
     ctx.fillStyle = '#EFEEEA';
@@ -656,9 +724,20 @@
     ctx.strokeStyle = '#141414';
     ctx.stroke();
     ctx.fillStyle = '#141414';
-    const t = p.r * 0.28, l = p.r * 0.95;
-    ctx.fillRect(-t / 2, -l / 2, t, l);
-    ctx.fillRect(-l / 2, -t / 2, l, t);
+
+    if (p.type === 'multiplier') {
+      ctx.font = `700 ${Math.round(p.r * 1.05)}px "Maison Neue", -apple-system, "Helvetica Neue", Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('2×', 0, 1);
+    } else if (p.type === 'double') {
+      drawChevron(0, -p.r * 0.3, p.r * 0.55);
+      drawChevron(0, p.r * 0.15, p.r * 0.55);
+    } else {
+      const t = p.r * 0.28, l = p.r * 0.95;
+      ctx.fillRect(-t / 2, -l / 2, t, l);
+      ctx.fillRect(-l / 2, -t / 2, l, t);
+    }
     ctx.restore();
   }
 
@@ -757,7 +836,7 @@
       ctx.fill();
     }
 
-    if (shieldActive) {
+    if (effects.shield.active) {
       const pulse = 1 + Math.sin(elapsed * 8) * 0.08;
       const ecx = player.x + player.w / 2, ecy = player.y + player.h / 2;
       ctx.save();
