@@ -36,8 +36,6 @@
   canvas#game {
     display: block;
     background: var(--beige);
-    max-width: 100%;
-    max-height: 100%;
     touch-action: manipulation;
   }
   #hud {
@@ -266,7 +264,7 @@
     <div class="brandmark">JWI</div>
     <canvas id="titleRunner" width="96" height="96" aria-hidden="true"></canvas>
     <h1 class="headline">Runner</h1>
-    <p class="sub">Tap &middot; Click &middot; Space To Run</p>
+    <p class="sub">Tap Or Space To Jump &middot; Swipe Or Arrows To Switch Lanes</p>
     <p class="legend">Every 100m &middot; Shield &middot; 2&times; Score &middot; Double Jump</p>
     <div class="stat-row">
       <div><span class="num" id="startBest">0</span><span class="cap">High Score</span></div>
@@ -277,10 +275,10 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function () {
   const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
   const wrap = document.getElementById('wrap');
   const scoreEl = document.getElementById('score');
   const bestEl = document.getElementById('best');
@@ -300,31 +298,29 @@
   };
   const toastEl = document.getElementById('toast');
   const titleRunnerCanvas = document.getElementById('titleRunner');
-  const titleRunnerCtx = titleRunnerCanvas.getContext('2d');
 
-  const DPR = Math.min(window.devicePixelRatio || 1, 2);
-  let W, H, GROUND_Y;
-
-  function resize() {
-    const w = Math.max(280, wrap.clientWidth);
-    const h = Math.max(320, wrap.clientHeight);
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
-    canvas.width = w * DPR;
-    canvas.height = h * DPR;
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    W = w;
-    H = h;
-    GROUND_Y = H - Math.max(70, H * 0.18);
+  if (typeof THREE === 'undefined') {
+    wrap.textContent = 'Unable to load the 3D engine. Check your connection and reload.';
+    return;
   }
-  window.addEventListener('resize', resize);
-  resize();
 
-  const GRAVITY = 2600;
-  const JUMP_VELOCITY = -900;
-  const BASE_SPEED = 340;
-  const MAX_SPEED = 820;
-  const SPEED_RAMP = 6.5;
+  // ---------- constants ----------
+  const LANES = [-2.2, 0, 2.2];
+  const LANE_WIDTH = 2.0;
+  const TILE_LENGTH = 12;
+  const NUM_TILES = 14;
+  const PLAYER_Z = 0;
+  const CAMERA_Z = 7.4;
+  const SPAWN_Z = -80;
+  const DESPAWN_Z = 9;
+  const COLLISION_Z = 0.6;
+
+  const GRAVITY = 26;
+  const JUMP_VELOCITY = 9.2;
+  const MAX_JUMP_HEIGHT = (JUMP_VELOCITY * JUMP_VELOCITY) / (2 * GRAVITY);
+  const BASE_SPEED = 9;
+  const SPEED_RAMP_K = 1.6;
+  const SPEED_CAP = 60;
   const SHAKE_DURATION = 0.18;
   const MILESTONE_DISTANCE = 100;
 
@@ -342,24 +338,179 @@
     double: 'Double Jump Acquired',
   };
 
-  const player = { x: 0, y: 0, w: 34, h: 46, vy: 0, onGround: true, squash: 1, legPhase: 0, extraJumpUsed: false };
+  // ---------- materials ----------
+  const matBlack = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.88, metalness: 0.04 });
+  const matBeige = new THREE.MeshStandardMaterial({ color: 0xEFEEEA, roughness: 0.7, metalness: 0.04 });
+  const matDivider = new THREE.MeshBasicMaterial({ color: 0xEFEEEA });
+  const matWire = new THREE.MeshBasicMaterial({ color: 0x141414, wireframe: true });
 
-  let obstacles = [], gaps = [], particles = [], streaks = [];
-  let skylineOffset = 0;
-  const SKYLINE_UNIT = 480;
-  const skyline = buildSkyline(SKYLINE_UNIT);
+  // ---------- scene / camera / renderer ----------
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xEFEEEA);
+  scene.fog = new THREE.Fog(0xEFEEEA, 24, 92);
+
+  const camera = new THREE.PerspectiveCamera(58, 1, 0.1, 200);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  const hemi = new THREE.HemisphereLight(0xFBFBFB, 0x141414, 0.55);
+  scene.add(hemi);
+  const sun = new THREE.DirectionalLight(0xFBFBFB, 0.75);
+  sun.position.set(5, 11, 6);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.camera.left = -7;
+  sun.shadow.camera.right = 7;
+  sun.shadow.camera.top = 7;
+  sun.shadow.camera.bottom = -7;
+  sun.shadow.camera.near = 1;
+  sun.shadow.camera.far = 26;
+  sun.shadow.bias = -0.0015;
+  scene.add(sun);
+
+  function resize() {
+    const w = Math.max(280, wrap.clientWidth);
+    const h = Math.max(320, wrap.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------- ground tiles ----------
+  function makeTile(zStart) {
+    const group = new THREE.Group();
+    group.position.z = zStart;
+    const laneMeshes = [];
+    for (let i = 0; i < 3; i++) {
+      const geo = new THREE.BoxGeometry(LANE_WIDTH, 0.4, TILE_LENGTH);
+      const mesh = new THREE.Mesh(geo, matBlack);
+      mesh.position.set(LANES[i], -0.2, 0);
+      mesh.receiveShadow = true;
+      group.add(mesh);
+      laneMeshes.push(mesh);
+    }
+    const dGeo = new THREE.BoxGeometry(0.05, 0.02, TILE_LENGTH);
+    const divL = new THREE.Mesh(dGeo, matDivider);
+    divL.position.set(-1.1, 0.01, 0);
+    const divR = new THREE.Mesh(dGeo, matDivider);
+    divR.position.set(1.1, 0.01, 0);
+    group.add(divL, divR);
+    scene.add(group);
+    return { group, laneMeshes, gapLanes: new Set() };
+  }
+
+  const tiles = [];
+  for (let i = 0; i < NUM_TILES; i++) {
+    tiles.push(makeTile(TILE_LENGTH - i * TILE_LENGTH));
+  }
+
+  function tileGapChance() { return Math.min(0.5, 0.14 + elapsed / 220); }
+  function tileDoubleGapChance() { return Math.min(0.22, elapsed / 480); }
+
+  function recycleTile(tile) {
+    let minZ = Infinity;
+    for (const t of tiles) minZ = Math.min(minZ, t.group.position.z);
+    tile.group.position.z = minZ - TILE_LENGTH;
+    tile.gapLanes.clear();
+    if (elapsed > 3 && Math.random() < tileGapChance()) {
+      const lanesShuffled = [0, 1, 2].sort(() => Math.random() - 0.5);
+      tile.gapLanes.add(lanesShuffled[0]);
+      if (Math.random() < tileDoubleGapChance()) tile.gapLanes.add(lanesShuffled[1]);
+    }
+    for (let i = 0; i < 3; i++) tile.laneMeshes[i].visible = !tile.gapLanes.has(i);
+  }
+
+  function tileAt(z) {
+    for (const t of tiles) {
+      const min = t.group.position.z - TILE_LENGTH / 2;
+      const max = t.group.position.z + TILE_LENGTH / 2;
+      if (z >= min && z < max) return t;
+    }
+    return null;
+  }
+
+  // ---------- runner rig (shared by player and title mascot) ----------
+  function buildRunnerRig(scale) {
+    scale = scale || 1;
+    const rig = new THREE.Group();
+
+    const legGeo = new THREE.BoxGeometry(0.16 * scale, 0.5 * scale, 0.16 * scale);
+    const hipL = new THREE.Group();
+    hipL.position.set(-0.13 * scale, 0.5 * scale, 0);
+    const legL = new THREE.Mesh(legGeo, matBeige);
+    legL.position.y = -0.25 * scale;
+    legL.castShadow = true;
+    hipL.add(legL);
+
+    const hipR = new THREE.Group();
+    hipR.position.set(0.13 * scale, 0.5 * scale, 0);
+    const legR = new THREE.Mesh(legGeo, matBeige);
+    legR.position.y = -0.25 * scale;
+    legR.castShadow = true;
+    hipR.add(legR);
+
+    const armGeo = new THREE.BoxGeometry(0.12 * scale, 0.4 * scale, 0.12 * scale);
+    const shoulder = new THREE.Group();
+    shoulder.position.set(0.17 * scale, 0.95 * scale, 0);
+    const arm = new THREE.Mesh(armGeo, matBeige);
+    arm.position.y = -0.2 * scale;
+    arm.castShadow = true;
+    shoulder.add(arm);
+
+    const torsoGeo = new THREE.BoxGeometry(0.42 * scale, 0.55 * scale, 0.28 * scale);
+    const torso = new THREE.Mesh(torsoGeo, matBeige);
+    torso.position.set(0, 0.78 * scale, 0);
+    torso.castShadow = true;
+
+    const headGeo = new THREE.SphereGeometry(0.18 * scale, 16, 16);
+    const head = new THREE.Mesh(headGeo, matBeige);
+    head.position.set(0.03 * scale, 1.18 * scale, 0);
+    head.castShadow = true;
+
+    const shieldAura = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.75 * scale, 1),
+      new THREE.MeshBasicMaterial({ color: 0x141414, wireframe: true, transparent: true, opacity: 0.22 })
+    );
+    shieldAura.position.y = 0.7 * scale;
+    shieldAura.visible = false;
+
+    rig.add(hipL, hipR, shoulder, torso, head, shieldAura);
+    return { rig, hipL, hipR, shoulder, shieldAura };
+  }
+
+  const playerRig = buildRunnerRig(1);
+  scene.add(playerRig.rig);
+
+  // ---------- player state ----------
+  const player = {
+    lane: 1,
+    x: LANES[1],
+    y: 0,
+    vy: 0,
+    onGround: true,
+    extraJumpUsed: false,
+    legPhase: 0,
+  };
+
+  let camX = LANES[1];
+
+  let obstacles = [];
+  let powerups = [];
 
   let speed = BASE_SPEED;
   let distance = 0;
   let elapsed = 0;
   let lastMilestone = 0;
-  let powerup = null;
   const effects = {
     shield: { active: false, timeLeft: 0 },
     multiplier: { active: false, timeLeft: 0 },
     double: { active: false, timeLeft: 0 },
   };
-  let streakTimer = 0;
 
   let best = 0;
   try { best = parseInt(localStorage.getItem('jwiRunnerBest') || '0', 10) || 0; } catch (e) { best = 0; }
@@ -370,46 +521,46 @@
   let lastTime = null;
   let nextObstacleAt = 0;
   let obstacleTimer = 0;
-  let groundOffset = 0;
   let shakeTime = 0;
 
-  function buildSkyline(unitWidth) {
-    const arr = [];
-    let x = 0;
-    while (x < unitWidth) {
-      const w = 30 + Math.random() * 50;
-      const h = 40 + Math.random() * 90;
-      arr.push({ x, w, h });
-      x += w + 14 + Math.random() * 22;
-    }
-    return arr;
-  }
-
   function resetGame() {
-    player.x = W * 0.16;
-    player.y = GROUND_Y - player.h;
+    player.lane = 1;
+    player.x = LANES[1];
+    player.y = 0;
     player.vy = 0;
     player.onGround = true;
-    player.squash = 1;
-    player.legPhase = 0;
     player.extraJumpUsed = false;
-    obstacles = []; gaps = []; particles = []; streaks = [];
+    player.legPhase = 0;
+    camX = LANES[1];
+
+    for (const o of obstacles) scene.remove(o.mesh);
+    for (const p of powerups) scene.remove(p.mesh);
+    obstacles = [];
+    powerups = [];
+
+    for (let i = 0; i < tiles.length; i++) {
+      tiles[i].group.position.z = TILE_LENGTH - i * TILE_LENGTH;
+      tiles[i].gapLanes.clear();
+      for (let j = 0; j < 3; j++) tiles[i].laneMeshes[j].visible = true;
+    }
+
     speed = BASE_SPEED;
     distance = 0;
     elapsed = 0;
     obstacleTimer = 0;
-    nextObstacleAt = 1.1;
+    nextObstacleAt = 1.4;
     lastMilestone = 0;
-    powerup = null;
-    streakTimer = 0;
     shakeTime = 0;
     scoreEl.textContent = '0';
+
     for (const key of POWERUP_TYPES) {
       effects[key].active = false;
       effects[key].timeLeft = 0;
       badges[key].classList.remove('show');
     }
+    playerRig.shieldAura.visible = false;
   }
+  resetGame();
 
   function startGame() {
     resetGame();
@@ -446,62 +597,16 @@
     if (player.onGround) {
       player.vy = JUMP_VELOCITY;
       player.onGround = false;
-      player.squash = 1;
       player.extraJumpUsed = false;
-      spawnDust();
     } else if (effects.double.active && !player.extraJumpUsed) {
       player.vy = JUMP_VELOCITY * 0.85;
       player.extraJumpUsed = true;
-      spawnDust();
     }
   }
 
-  function spawnDust() {
-    for (let i = 0; i < 6; i++) {
-      particles.push({
-        x: player.x + player.w / 2, y: GROUND_Y,
-        vx: (Math.random() - 0.5) * 120, vy: -Math.random() * 80,
-        life: 0.4 + Math.random() * 0.2, age: 0,
-      });
-    }
-  }
-
-  function spawnBurst(x, y) {
-    for (let i = 0; i < 10; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const sp = 60 + Math.random() * 100;
-      particles.push({
-        x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-        life: 0.35 + Math.random() * 0.25, age: 0,
-      });
-    }
-  }
-
-  function spawnObstacle() {
-    const r = Math.random();
-    if (r < 0.35) {
-      const gw = 60 + Math.random() * 40 + Math.min(speed - BASE_SPEED, 240) * 0.15;
-      gaps.push({ x: W + 20, w: gw });
-    } else if (r < 0.7) {
-      const h = 32 + Math.random() * 20;
-      obstacles.push({ x: W + 20, y: GROUND_Y - h, w: 26, h, type: 'block' });
-    } else {
-      const h = 54 + Math.random() * 18;
-      obstacles.push({ x: W + 20, y: GROUND_Y - h, w: 30, h, type: 'spike' });
-    }
-  }
-
-  function spawnPowerup() {
-    const maxJumpHeight = (JUMP_VELOCITY * JUMP_VELOCITY) / (2 * GRAVITY);
-    const floorY = GROUND_Y - player.h;
-    const y = floorY - maxJumpHeight * (0.5 + Math.random() * 0.2);
-    const type = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
-    powerup = { x: W + 40, y, r: 13, phase: 0, type };
-    showToast(POWERUP_SPAWN_TOAST[type]);
-  }
-
-  function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
-    return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+  function laneMove(dir) {
+    if (state !== 'playing') return;
+    player.lane = Math.max(0, Math.min(2, player.lane + dir));
   }
 
   function showToast(text, duration) {
@@ -539,43 +644,78 @@
     }
   }
 
+  // ---------- obstacle / powerup spawning ----------
+  function spawnObstacle() {
+    const type = Math.random() < 0.5 ? 'hurdle' : 'barrier';
+    const lane = Math.floor(Math.random() * 3);
+    let mesh, topY;
+    if (type === 'hurdle') {
+      mesh = new THREE.Mesh(new THREE.BoxGeometry(LANE_WIDTH * 0.82, 0.6, 0.5), matBlack);
+      mesh.position.set(LANES[lane], 0.3, SPAWN_Z);
+      topY = 0.62;
+    } else {
+      mesh = new THREE.Mesh(new THREE.BoxGeometry(LANE_WIDTH * 0.82, 3.0, 0.5), matBlack);
+      mesh.position.set(LANES[lane], 1.5, SPAWN_Z);
+      topY = 99;
+    }
+    mesh.castShadow = true;
+    scene.add(mesh);
+    obstacles.push({ mesh, lane, type, topY });
+  }
+
+  function spawnPowerup() {
+    const type = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+    const lane = Math.floor(Math.random() * 3);
+    const y = MAX_JUMP_HEIGHT * (0.5 + Math.random() * 0.2);
+    let geo;
+    if (type === 'shield') geo = new THREE.IcosahedronGeometry(0.32, 0);
+    else if (type === 'multiplier') geo = new THREE.OctahedronGeometry(0.34, 0);
+    else geo = new THREE.TorusGeometry(0.26, 0.1, 8, 16);
+    const mesh = new THREE.Mesh(geo, matBeige);
+    mesh.castShadow = true;
+    const wire = new THREE.Mesh(geo, matWire);
+    wire.scale.setScalar(1.06);
+    mesh.add(wire);
+    mesh.position.set(LANES[lane], y, SPAWN_Z);
+    scene.add(mesh);
+    powerups.push({ mesh, lane, type, baseY: y, phase: Math.random() * Math.PI * 2 });
+    showToast(POWERUP_SPAWN_TOAST[type]);
+  }
+
+  // ---------- update ----------
   function update(dt) {
     elapsed += dt;
-    speed = Math.min(MAX_SPEED, BASE_SPEED + elapsed * SPEED_RAMP);
-    distance += speed * dt * 0.05 * (effects.multiplier.active ? 2 : 1);
+    const targetSpeed = BASE_SPEED + SPEED_RAMP_K * Math.sqrt(elapsed);
+    speed = Math.min(SPEED_CAP, targetSpeed);
+    distance += speed * dt * (effects.multiplier.active ? 2 : 1);
     scoreEl.textContent = Math.floor(distance);
 
-    groundOffset = (groundOffset + speed * dt) % 40;
-    skylineOffset -= speed * dt * 0.15;
-    if (skylineOffset <= -SKYLINE_UNIT) skylineOffset += SKYLINE_UNIT;
+    // lane easing
+    const targetX = LANES[player.lane];
+    player.x += (targetX - player.x) * Math.min(1, dt * 9);
 
-    player.vy += GRAVITY * dt;
+    // jump physics
+    player.vy -= GRAVITY * dt;
     player.y += player.vy * dt;
-    if (player.onGround) player.legPhase += dt * speed * 0.02;
-
-    let overGap = false;
-    for (const g of gaps) {
-      if (player.x + player.w * 0.25 > g.x && player.x + player.w * 0.75 < g.x + g.w) overGap = true;
-    }
-
-    const floorY = GROUND_Y - player.h;
-    const groundLock = (!overGap || effects.shield.active);
-    if (groundLock && player.y >= floorY) {
-      if (!player.onGround) player.squash = 1.25;
-      player.y = floorY;
+    if (player.y <= 0) {
+      if (!player.onGround) player.onGround = true;
+      player.y = 0;
       player.vy = 0;
-      player.onGround = true;
       player.extraJumpUsed = false;
     } else {
       player.onGround = false;
     }
-    player.squash += (1 - player.squash) * Math.min(1, dt * 10);
+    if (player.onGround) player.legPhase += dt * (2.4 + speed * 0.12);
 
-    if (!effects.shield.active) {
-      if (overGap && player.y >= floorY) { triggerDeath(); return; }
-      if (player.y > H + 100) { triggerDeath(); return; }
+    // ground gap check
+    const currentTile = tileAt(PLAYER_Z);
+    const overGap = !!currentTile && currentTile.gapLanes.has(player.lane);
+    if (overGap && player.onGround && player.y <= 0.02 && !effects.shield.active) {
+      triggerDeath();
+      return;
     }
 
+    // effect timers
     for (const key of POWERUP_TYPES) {
       const e = effects[key];
       if (!e.active) continue;
@@ -586,283 +726,101 @@
         badges[key].classList.remove('show');
       }
     }
+    playerRig.shieldAura.visible = effects.shield.active;
+    if (effects.shield.active) {
+      const pulse = 1 + Math.sin(elapsed * 8) * 0.06;
+      playerRig.shieldAura.scale.setScalar(pulse);
+    }
 
+    // obstacle spawn timer
     obstacleTimer += dt;
     if (obstacleTimer >= nextObstacleAt) {
       spawnObstacle();
       obstacleTimer = 0;
-      const difficulty = Math.max(0.45, 1 - elapsed / 90);
+      const difficulty = Math.max(0.42, 1 - elapsed / 140);
       nextObstacleAt = (0.9 + Math.random() * 0.9) * difficulty;
     }
 
+    // powerup milestone
     const milestone = Math.floor(distance / MILESTONE_DISTANCE);
-    if (milestone > lastMilestone && !powerup) {
+    if (milestone > lastMilestone && powerups.length === 0) {
       lastMilestone = milestone;
       spawnPowerup();
     }
 
-    for (const o of obstacles) o.x -= speed * dt;
-    for (const g of gaps) g.x -= speed * dt;
-    obstacles = obstacles.filter(o => o.x + o.w > -20);
-    gaps = gaps.filter(g => g.x + g.w > -20);
+    // move + recycle tiles
+    for (const t of tiles) {
+      t.group.position.z += speed * dt;
+      if (t.group.position.z - TILE_LENGTH / 2 > DESPAWN_Z) recycleTile(t);
+    }
 
-    if (powerup) {
-      powerup.x -= speed * dt;
-      powerup.phase += dt;
-      const px = player.x, pw = player.w, py = player.y, ph = player.h;
-      if (rectsOverlap(px, py, pw, ph, powerup.x - powerup.r, powerup.y - powerup.r, powerup.r * 2, powerup.r * 2)) {
-        const type = powerup.type;
+    // move obstacles, check collision
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      const o = obstacles[i];
+      o.mesh.position.z += speed * dt;
+      if (o.mesh.position.z > DESPAWN_Z) {
+        scene.remove(o.mesh);
+        obstacles.splice(i, 1);
+        continue;
+      }
+      if (!effects.shield.active && o.lane === player.lane &&
+          Math.abs(o.mesh.position.z - PLAYER_Z) < COLLISION_Z && player.y < o.topY) {
+        triggerDeath();
+        return;
+      }
+    }
+
+    // move powerups, check pickup
+    for (let i = powerups.length - 1; i >= 0; i--) {
+      const p = powerups[i];
+      p.mesh.position.z += speed * dt;
+      p.phase += dt * 3;
+      p.mesh.position.y = p.baseY + Math.sin(p.phase) * 0.08;
+      p.mesh.rotation.y += dt * 1.4;
+      if (p.mesh.position.z > DESPAWN_Z) {
+        scene.remove(p.mesh);
+        powerups.splice(i, 1);
+        continue;
+      }
+      if (p.lane === player.lane && Math.abs(p.mesh.position.z - PLAYER_Z) < COLLISION_Z &&
+          Math.abs(player.y - p.baseY) < 0.55) {
+        const type = p.type;
         effects[type].active = true;
         effects[type].timeLeft = POWERUP_DURATION[type];
         badges[type].classList.add('show');
-        spawnBurst(powerup.x, powerup.y);
         showToast(POWERUP_PICKUP_TOAST[type]);
-        powerup = null;
-      } else if (powerup.x < -40) {
-        powerup = null;
+        scene.remove(p.mesh);
+        powerups.splice(i, 1);
       }
     }
-
-    if (!effects.shield.active) {
-      for (const o of obstacles) {
-        const px = player.x + 4, pw = player.w - 8, py = player.y + 4, ph = player.h - 6;
-        if (rectsOverlap(px, py, pw, ph, o.x, o.y, o.w, o.h)) { triggerDeath(); return; }
-      }
-    }
-
-    streakTimer += dt;
-    if (streakTimer > 0.05) {
-      streakTimer = 0;
-      streaks.push({ x: W + 10, y: 20 + Math.random() * (GROUND_Y - 60), len: 30 + Math.random() * 40, age: 0, life: 0.4 });
-    }
-    for (const s of streaks) { s.x -= speed * dt * 1.4; s.age += dt; }
-    streaks = streaks.filter(s => s.x > -80 && s.age < s.life);
-
-    for (const p of particles) {
-      p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt;
-    }
-    particles = particles.filter(p => p.age < p.life);
   }
 
-  function roundRectPath(c, x, y, w, h, r) {
-    c.beginPath();
-    c.moveTo(x + r, y);
-    c.arcTo(x + w, y, x + w, y + h, r);
-    c.arcTo(x + w, y + h, x, y + h, r);
-    c.arcTo(x, y + h, x, y, r);
-    c.arcTo(x, y, x + w, y, r);
-    c.closePath();
-  }
-
-  function drawRunnerFigure(c, x, groundY, h, phase, color, airborne) {
-    const w = h * 0.62;
-    const legLen = h * 0.4;
-    const legW = w * 0.24;
-    const torsoH = h * 0.42;
-    const torsoW = w * 0.62;
-    const headR = w * 0.26;
-    const hipY = groundY - legLen;
-    const swing = airborne ? 0.7 : Math.sin(phase) * 0.85;
-
-    function drawLimb(hx, hy, len, w2, angle) {
-      c.save();
-      c.translate(hx, hy);
-      c.rotate(angle * 0.6);
-      roundRectPath(c, -w2 / 2, 0, w2, len, w2 * 0.42);
-      c.fill();
-      c.restore();
-    }
-
-    c.save();
-    c.fillStyle = color;
-
-    drawLimb(x, hipY, legLen, legW, airborne ? -0.5 : swing);
-    drawLimb(x, hipY, legLen, legW, airborne ? 0.9 : -swing);
-
-    c.save();
-    c.translate(x, hipY);
-    c.rotate(-0.14);
-    roundRectPath(c, -torsoW / 2, -torsoH, torsoW, torsoH, torsoW * 0.32);
-    c.fill();
-    c.restore();
-
-    const headCx = x + Math.sin(-0.14) * torsoH * 0.2 + torsoW * 0.18;
-    const headCy = hipY - torsoH - headR * 0.85;
-    c.beginPath();
-    c.arc(headCx, headCy, headR, 0, Math.PI * 2);
-    c.fill();
-
-    drawLimb(x, hipY - torsoH * 0.62, torsoH * 0.6, legW * 0.75, airborne ? -0.8 : -swing);
-    c.restore();
-  }
-
-  function drawChevron(cx, cy, size) {
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.beginPath();
-    ctx.moveTo(-size / 2, size * 0.32);
-    ctx.lineTo(0, -size * 0.32);
-    ctx.lineTo(size / 2, size * 0.32);
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = '#141414';
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function drawPowerup(p) {
-    const bob = Math.sin(p.phase * 3) * 4;
-    const cx = p.x, cy = p.y + bob;
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.beginPath();
-    ctx.arc(0, 0, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = '#EFEEEA';
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = '#141414';
-    ctx.stroke();
-    ctx.fillStyle = '#141414';
-
-    if (p.type === 'multiplier') {
-      ctx.font = `700 ${Math.round(p.r * 1.05)}px "Maison Neue", -apple-system, "Helvetica Neue", Arial, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('2×', 0, 1);
-    } else if (p.type === 'double') {
-      drawChevron(0, -p.r * 0.3, p.r * 0.55);
-      drawChevron(0, p.r * 0.15, p.r * 0.55);
+  // ---------- render ----------
+  function updateRig() {
+    playerRig.rig.position.set(player.x, player.y, PLAYER_Z);
+    const swing = player.onGround ? Math.sin(player.legPhase) * 0.85 : 0.7;
+    if (player.onGround) {
+      playerRig.hipL.rotation.x = swing;
+      playerRig.hipR.rotation.x = -swing;
+      playerRig.shoulder.rotation.x = -swing * 0.8;
+      playerRig.rig.rotation.x = -0.06;
     } else {
-      const t = p.r * 0.28, l = p.r * 0.95;
-      ctx.fillRect(-t / 2, -l / 2, t, l);
-      ctx.fillRect(-l / 2, -t / 2, l, t);
+      playerRig.hipL.rotation.x = -0.5;
+      playerRig.hipR.rotation.x = 0.9;
+      playerRig.shoulder.rotation.x = -0.8;
+      playerRig.rig.rotation.x = -0.14;
     }
-    ctx.restore();
   }
 
-  function draw() {
-    let shakeX = 0, shakeY = 0;
-    if (state === 'dying') {
-      const t = Math.max(0, shakeTime / SHAKE_DURATION);
-      const mag = 7 * t;
-      shakeX = (Math.random() - 0.5) * mag;
-      shakeY = (Math.random() - 0.5) * mag;
+  function updateCamera(dt, shakeMag) {
+    camX += (player.x - camX) * Math.min(1, dt * 6);
+    let sx = 0, sy = 0;
+    if (shakeMag > 0) {
+      sx = (Math.random() - 0.5) * shakeMag;
+      sy = (Math.random() - 0.5) * shakeMag;
     }
-
-    ctx.save();
-    ctx.translate(shakeX, shakeY);
-    ctx.fillStyle = '#EFEEEA';
-    ctx.fillRect(-10, -10, W + 20, H + 20);
-
-    ctx.fillStyle = 'rgba(20,20,20,0.07)';
-    for (let rep = 0; rep < 3; rep++) {
-      const baseX = skylineOffset + rep * SKYLINE_UNIT;
-      for (const b of skyline) {
-        const bx = baseX + b.x;
-        if (bx > W || bx + b.w < 0) continue;
-        ctx.fillRect(bx, GROUND_Y - b.h, b.w, b.h);
-      }
-    }
-
-    for (const s of streaks) {
-      const alpha = 0.16 * (1 - s.age / s.life);
-      ctx.strokeStyle = `rgba(20,20,20,${alpha})`;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(s.x, s.y);
-      ctx.lineTo(s.x - s.len, s.y);
-      ctx.stroke();
-    }
-
-    const groundSegments = [];
-    let cursor = 0;
-    const sortedGaps = [...gaps].sort((a, b) => a.x - b.x);
-    for (const g of sortedGaps) { groundSegments.push([cursor, g.x]); cursor = g.x + g.w; }
-    groundSegments.push([cursor, W]);
-
-    ctx.fillStyle = '#141414';
-    for (const [gx0, gx1] of groundSegments) {
-      if (gx1 <= gx0) continue;
-      ctx.fillRect(gx0, GROUND_Y, gx1 - gx0, H - GROUND_Y);
-    }
-
-    ctx.strokeStyle = 'rgba(20,20,20,0.5)';
-    ctx.lineWidth = 2;
-    for (const g of sortedGaps) {
-      for (let x = g.x; x < g.x + g.w; x += 14) {
-        ctx.beginPath();
-        ctx.moveTo(x, GROUND_Y + 4);
-        ctx.lineTo(x + 8, H);
-        ctx.stroke();
-      }
-    }
-
-    ctx.strokeStyle = 'rgba(20,20,20,0.35)';
-    ctx.lineWidth = 1;
-    for (const [gx0, gx1] of groundSegments) {
-      for (let x = gx0 - (groundOffset % 40); x < gx1; x += 40) {
-        if (x < gx0) continue;
-        ctx.beginPath();
-        ctx.moveTo(x, GROUND_Y + 6);
-        ctx.lineTo(x, GROUND_Y + 12);
-        ctx.stroke();
-      }
-    }
-
-    for (const o of obstacles) {
-      ctx.fillStyle = '#141414';
-      if (o.type === 'spike') {
-        ctx.beginPath();
-        ctx.moveTo(o.x, o.y + o.h);
-        ctx.lineTo(o.x + o.w / 2, o.y);
-        ctx.lineTo(o.x + o.w, o.y + o.h);
-        ctx.closePath();
-        ctx.fill();
-      } else {
-        ctx.fillRect(o.x, o.y, o.w, o.h);
-        ctx.fillStyle = 'rgba(251,251,251,0.16)';
-        ctx.fillRect(o.x, o.y, o.w, 4);
-      }
-    }
-
-    if (powerup) drawPowerup(powerup);
-
-    for (const p of particles) {
-      const alpha = 1 - p.age / p.life;
-      ctx.fillStyle = `rgba(20,20,20,${alpha * 0.55})`;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    if (effects.shield.active) {
-      const pulse = 1 + Math.sin(elapsed * 8) * 0.08;
-      const ecx = player.x + player.w / 2, ecy = player.y + player.h / 2;
-      ctx.save();
-      ctx.strokeStyle = '#141414';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.ellipse(ecx, ecy, player.w * 0.95 * pulse, player.h * 0.62 * pulse, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.strokeStyle = '#FBFBFB';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.ellipse(ecx, ecy, player.w * 0.95 * pulse, player.h * 0.62 * pulse, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    ctx.save();
-    const cx = player.x + player.w / 2;
-    const cy = player.y + player.h;
-    ctx.translate(cx, cy);
-    ctx.scale(1 / player.squash, player.squash);
-    ctx.translate(-cx, -cy);
-    drawRunnerFigure(ctx, cx, cy, player.h, player.legPhase, '#141414', !player.onGround);
-    ctx.restore();
-
-    ctx.restore();
+    camera.position.set(camX + sx, 3.3 + player.y * 0.12 + sy, CAMERA_Z);
+    camera.lookAt(camX * 0.4, 1.0 + player.y * 0.2, -9);
   }
 
   function loop(ts) {
@@ -871,17 +829,43 @@
     let dt = (ts - lastTime) / 1000;
     dt = Math.min(dt, 0.035);
     lastTime = ts;
+
+    let shakeMag = 0;
     if (state === 'playing') update(dt);
-    if (state === 'dying') shakeTime -= dt;
-    draw();
+    if (state === 'dying') {
+      shakeTime -= dt;
+      shakeMag = 7 * Math.max(0, shakeTime / SHAKE_DURATION);
+    }
+
+    updateRig();
+    updateCamera(dt, shakeMag);
+    renderer.render(scene, camera);
     requestAnimationFrame(loop);
   }
 
-  function drawIdle() {
-    resetGame();
-    draw();
+  function renderIdleFrame() {
+    updateRig();
+    updateCamera(0, 0);
+    renderer.render(scene, camera);
   }
-  drawIdle();
+  renderIdleFrame();
+
+  // ---------- title screen mascot (separate mini 3D scene) ----------
+  const titleScene = new THREE.Scene();
+  const titleCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 10);
+  titleCamera.position.set(0, 1.05, 2.6);
+  titleCamera.lookAt(0, 0.7, 0);
+  const titleRenderer = new THREE.WebGLRenderer({ canvas: titleRunnerCanvas, antialias: true, alpha: true });
+  titleRenderer.setClearColor(0x000000, 0);
+  titleRenderer.setSize(96, 96, false);
+  titleRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const titleHemi = new THREE.HemisphereLight(0xFBFBFB, 0x141414, 0.9);
+  titleScene.add(titleHemi);
+  const titleSun = new THREE.DirectionalLight(0xFBFBFB, 0.8);
+  titleSun.position.set(2, 3, 3);
+  titleScene.add(titleSun);
+  const titleRig = buildRunnerRig(1);
+  titleScene.add(titleRig.rig);
 
   let titlePhase = 0;
   let titleLastTs = null;
@@ -890,33 +874,58 @@
     const dt = Math.min((ts - titleLastTs) / 1000, 0.05);
     titleLastTs = ts;
     titlePhase += dt * 7;
-    const tw = titleRunnerCanvas.width, th = titleRunnerCanvas.height;
-    titleRunnerCtx.clearRect(0, 0, tw, th);
-    drawRunnerFigure(titleRunnerCtx, tw / 2, th * 0.86, th * 0.78, titlePhase, '#FBFBFB', false);
+    const swing = Math.sin(titlePhase) * 0.85;
+    titleRig.hipL.rotation.x = swing;
+    titleRig.hipR.rotation.x = -swing;
+    titleRig.shoulder.rotation.x = -swing * 0.8;
+    titleRig.rig.rotation.x = -0.06;
+    titleRig.rig.position.y = Math.abs(Math.sin(titlePhase * 2)) * 0.04;
+    titleRenderer.render(titleScene, titleCamera);
     requestAnimationFrame(loopTitleRunner);
   }
   requestAnimationFrame(loopTitleRunner);
 
-  function handleInput(e) {
-    if (e.type === 'keydown') {
-      if (e.code !== 'Space' && e.code !== 'ArrowUp') return;
-      e.preventDefault();
-    }
-    jump();
+  // ---------- input ----------
+  function handleKeydown(e) {
+    if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
+    else if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); laneMove(-1); }
+    else if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); laneMove(1); }
   }
+  window.addEventListener('keydown', handleKeydown);
 
-  window.addEventListener('keydown', handleInput);
-  canvas.addEventListener('pointerdown', jump);
+  let touchStartX = 0, touchStartY = 0, touchActive = false;
+  const SWIPE_THRESHOLD = 32;
+  function onPointerDown(e) {
+    touchActive = true;
+    touchStartX = e.clientX;
+    touchStartY = e.clientY;
+  }
+  function onPointerUp(e) {
+    if (!touchActive) return;
+    touchActive = false;
+    const dx = e.clientX - touchStartX;
+    const dy = e.clientY - touchStartY;
+    if (Math.abs(dy) > Math.abs(dx) && dy < -SWIPE_THRESHOLD) {
+      jump();
+    } else if (Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+      laneMove(dx > 0 ? 1 : -1);
+    } else {
+      jump();
+    }
+  }
+  canvas.addEventListener('pointerdown', onPointerDown);
+  canvas.addEventListener('pointerup', onPointerUp);
   startOverlay.addEventListener('pointerdown', (e) => {
     if (e.target.closest('button')) return;
     jump();
   });
+
   restartBtn.addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
   shareBtnHud.addEventListener('click', (e) => { e.stopPropagation(); shareLink(); });
   shareBtnStart.addEventListener('click', (e) => { e.stopPropagation(); shareLink(); });
   shareBtnOver.addEventListener('click', (e) => { e.stopPropagation(); shareLink(); });
 
-  window.addEventListener('resize', () => { if (state !== 'playing' && state !== 'dying') drawIdle(); });
+  window.addEventListener('resize', () => { if (state !== 'playing' && state !== 'dying') renderIdleFrame(); });
 })();
 </script>
 </body>
