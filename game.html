@@ -37,7 +37,10 @@
     display: block;
     background: var(--beige);
     touch-action: manipulation;
+    filter: brightness(1);
+    transition: filter 0.4s ease;
   }
+  canvas#game.impact { filter: brightness(0.72); }
   #hud {
     position: absolute;
     top: 18px;
@@ -143,7 +146,7 @@
     padding: 32px;
     z-index: 10;
   }
-  #overlay { opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+  #overlay { opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
   #overlay.show { opacity: 1; pointer-events: auto; }
   #startOverlay.hide { display: none; }
   .brandmark {
@@ -321,7 +324,7 @@
   const BASE_SPEED = 9;
   const SPEED_RAMP_K = 1.6;
   const SPEED_CAP = 60;
-  const SHAKE_DURATION = 0.18;
+  const DEATH_DURATION = 0.55;
   const MILESTONE_DISTANCE = 100;
 
   const POWERUP_TYPES = ['shield', 'multiplier', 'double'];
@@ -521,7 +524,10 @@
   let lastTime = null;
   let nextObstacleAt = 0;
   let obstacleTimer = 0;
-  let shakeTime = 0;
+  let deathElapsed = 0;
+  let deathStartSpeed = 0;
+  let deathKnockVX = 0;
+  let deathTiltDir = 1;
 
   function resetGame() {
     player.lane = 1;
@@ -532,6 +538,8 @@
     player.extraJumpUsed = false;
     player.legPhase = 0;
     camX = LANES[1];
+    playerRig.rig.rotation.set(-0.06, 0, 0);
+    canvas.classList.remove('impact');
 
     for (const o of obstacles) scene.remove(o.mesh);
     for (const p of powerups) scene.remove(p.mesh);
@@ -550,7 +558,7 @@
     obstacleTimer = 0;
     nextObstacleAt = 1.4;
     lastMilestone = 0;
-    shakeTime = 0;
+    deathElapsed = 0;
     scoreEl.textContent = '0';
 
     for (const key of POWERUP_TYPES) {
@@ -574,8 +582,12 @@
   function triggerDeath() {
     if (state !== 'playing') return;
     state = 'dying';
-    shakeTime = SHAKE_DURATION;
-    setTimeout(endGame, SHAKE_DURATION * 1000);
+    deathElapsed = 0;
+    deathStartSpeed = speed;
+    deathKnockVX = -1.5;
+    deathTiltDir = player.lane === 2 ? -1 : 1;
+    player.vy = Math.max(player.vy, 3.4);
+    canvas.classList.add('impact');
   }
 
   function endGame() {
@@ -812,15 +824,43 @@
     }
   }
 
-  function updateCamera(dt, shakeMag) {
+  function updateCamera(dt, sx, sy) {
     camX += (player.x - camX) * Math.min(1, dt * 6);
-    let sx = 0, sy = 0;
-    if (shakeMag > 0) {
-      sx = (Math.random() - 0.5) * shakeMag;
-      sy = (Math.random() - 0.5) * shakeMag;
-    }
-    camera.position.set(camX + sx, 3.3 + player.y * 0.12 + sy, CAMERA_Z);
+    camera.position.set(camX + (sx || 0), 3.3 + player.y * 0.12 + (sy || 0), CAMERA_Z);
     camera.lookAt(camX * 0.4, 1.0 + player.y * 0.2, -9);
+  }
+
+  // eases the world to a stop and knocks the runner down, instead of an
+  // abrupt freeze, so a collision reads as an impact rather than a glitch
+  function updateDeath(dt) {
+    deathElapsed += dt;
+    const t = Math.min(1, deathElapsed / DEATH_DURATION);
+    const ease = 1 - (1 - t) * (1 - t);
+    const decaySpeed = deathStartSpeed * (1 - ease);
+
+    for (const tl of tiles) tl.group.position.z += decaySpeed * dt;
+    for (const o of obstacles) o.mesh.position.z += decaySpeed * dt;
+    for (const p of powerups) p.mesh.position.z += decaySpeed * dt;
+
+    player.vy -= GRAVITY * 0.55 * dt;
+    player.y = Math.max(0, player.y + player.vy * dt);
+    player.x += deathKnockVX * dt;
+    deathKnockVX *= (1 - Math.min(1, dt * 3));
+
+    playerRig.rig.position.set(player.x, player.y, PLAYER_Z);
+    playerRig.rig.rotation.z = deathTiltDir * t * 0.8;
+    playerRig.rig.rotation.x = -0.06 - t * 0.4;
+    playerRig.hipL.rotation.x = -0.3;
+    playerRig.hipR.rotation.x = 0.5;
+    playerRig.shoulder.rotation.x = -0.5;
+
+    const shakeEnvelope = Math.sin(Math.min(1, t) * Math.PI);
+    const shakeMag = 0.2 * shakeEnvelope;
+    const sx = Math.sin(deathElapsed * 26) * shakeMag;
+    const sy = Math.cos(deathElapsed * 19) * shakeMag * 0.6;
+    updateCamera(dt, sx, sy);
+
+    if (t >= 1) endGame();
   }
 
   function loop(ts) {
@@ -830,22 +870,21 @@
     dt = Math.min(dt, 0.035);
     lastTime = ts;
 
-    let shakeMag = 0;
-    if (state === 'playing') update(dt);
-    if (state === 'dying') {
-      shakeTime -= dt;
-      shakeMag = 7 * Math.max(0, shakeTime / SHAKE_DURATION);
+    if (state === 'playing') {
+      update(dt);
+      updateRig();
+      updateCamera(dt);
+    } else if (state === 'dying') {
+      updateDeath(dt);
     }
 
-    updateRig();
-    updateCamera(dt, shakeMag);
     renderer.render(scene, camera);
     requestAnimationFrame(loop);
   }
 
   function renderIdleFrame() {
     updateRig();
-    updateCamera(0, 0);
+    updateCamera(0);
     renderer.render(scene, camera);
   }
   renderIdleFrame();
